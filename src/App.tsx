@@ -8,7 +8,7 @@ type AppProps = {
 
 const shell = css`
   :global(:root) {
-    --display-scale: 0.7;
+    --display-scale: 0.6;
     font-family:
       Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
       sans-serif;
@@ -300,7 +300,7 @@ const shell = css`
 
   :global(.slot) {
     display: grid;
-    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-columns: 38px minmax(0, 1fr);
     grid-template-rows: auto auto;
     align-items: center;
     min-height: 58px;
@@ -312,8 +312,12 @@ const shell = css`
 
   :global(.slot-icon) {
     grid-row: span 2;
-    width: 44px;
-    height: 44px;
+    width: 38px;
+    height: 38px;
+    background-image: var(--slot-sprite);
+    background-position: var(--slot-position);
+    background-repeat: no-repeat;
+    background-size: var(--slot-size);
   }
 
   :global(.slot span) {
@@ -365,14 +369,14 @@ const shell = css`
     align-items: end;
     justify-content: space-between;
     gap: 12px;
-    padding: 0 12px;
+    padding: 0 30px 78px 150px;
     pointer-events: none;
   }
 
   :global(.stick) {
     position: relative;
-    width: 116px;
-    height: 116px;
+    width: 156px;
+    height: 156px;
     flex: 0 0 auto;
     border: 2px solid rgba(255, 255, 255, 0.35);
     border-radius: 50%;
@@ -386,9 +390,9 @@ const shell = css`
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 52px;
-    height: 52px;
-    margin: -26px 0 0 -26px;
+    width: 68px;
+    height: 68px;
+    margin: -34px 0 0 -34px;
     border-radius: 50%;
     background: rgba(255, 248, 224, 0.9);
     box-shadow: 0 6px 14px rgba(9, 40, 50, 0.26);
@@ -447,8 +451,8 @@ export const App = observer(function App({ store }: AppProps) {
         </div>
         <div className="scale-control">
           <span>缩放</span>
-          <input id="display-scale" type="range" min="0.35" max="1" step="0.05" defaultValue="0.7" />
-          <strong id="display-scale-value">70%</strong>
+          <input id="display-scale" type="range" min="0.35" max="1" step="0.05" defaultValue="0.6" />
+          <strong id="display-scale-value">60%</strong>
         </div>
         <button id="orientation-toggle" className="orientation-toggle" type="button">
           <span className="portrait-label">竖屏</span>

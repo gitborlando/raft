@@ -1,5 +1,6 @@
 ﻿import spriteUrl from '../assets/spirte.png'
 import { SpriteRenderer } from './SpriteRenderer'
+import { frames } from './sprites'
 import {
   FLOAT_RADIUS,
   HOOK_BACK_SPEED,
@@ -44,12 +45,12 @@ sprite.src = spriteUrl
 const spriteRenderer = new SpriteRenderer(ctx, sprite)
 
 const inventory: Record<Item, number> = {
-  wood: 8,
-  plastic: 4,
-  leaf: 6,
-  rope: 0,
-  rawFish: 1,
-  cookedFish: 0,
+  wood: 999,
+  plastic: 999,
+  leaf: 999,
+  rope: 999,
+  rawFish: 999,
+  cookedFish: 999,
 }
 
 const raft = new Set<string>()
@@ -90,7 +91,7 @@ let lastMoveDir: Vec = { x: 0, y: 1 }
 let toastTimer = 0
 let completed = false
 let joystickPointer: number | null = null
-let displayScale = Number(window.localStorage.getItem('raft-display-scale') ?? displayScaleInput.value) || 0.7
+let displayScale = Number(displayScaleInput.value) || 0.6
 let fullscreenRequested = false
 
 for (let gx = -1; gx <= 1; gx += 1) {
@@ -133,7 +134,6 @@ function setDisplayScale(value: number): void {
   document.documentElement.style.setProperty('--display-scale', String(displayScale))
   displayScaleInput.value = String(displayScale)
   displayScaleValue.textContent = `${Math.round(displayScale * 100)}%`
-  window.localStorage.setItem('raft-display-scale', String(displayScale))
 }
 
 function toggleOrientationLayout(): void {
@@ -180,8 +180,8 @@ function addItem(item: Item, count: number): void {
   renderInventory()
 }
 
-function canPay(cost: Partial<Record<Item, number>>): boolean {
-  return Object.entries(cost).every(([item, count]) => inventory[item as Item] >= (count ?? 0))
+function canPay(_cost: Partial<Record<Item, number>>): boolean {
+  return true
 }
 
 function pay(cost: Partial<Record<Item, number>>): boolean {
@@ -189,9 +189,6 @@ function pay(cost: Partial<Record<Item, number>>): boolean {
     showToast('鏉愭枡涓嶈冻')
     return false
   }
-  Object.entries(cost).forEach(([item, count]) => {
-    inventory[item as Item] -= count ?? 0
-  })
   renderInventory()
   return true
 }
@@ -427,7 +424,6 @@ function interact(): void {
         showToast('没有生鱼')
         return
       }
-      inventory.rawFish -= 1
       grill.grill.state = 'cooking'
       grill.grill.timer = 8
       renderInventory()
@@ -453,7 +449,6 @@ function eatFish(): void {
     showToast('娌℃湁鐑ら奔')
     return
   }
-  inventory.cookedFish -= 1
   renderInventory()
   showToast('鍚冧笅鐑ら奔')
 }
@@ -768,37 +763,29 @@ function drawPlayer(): void {
 function renderInventory(): void {
   inventoryGrid.innerHTML = INVENTORY_ITEMS.map((item) => {
     const icon = item === 'wood' ? 'item_single_plank' : item === 'plastic' ? 'item_plastic_waste' : item === 'leaf' ? 'item_small_leaf' : item === 'rope' ? 'item_rope_coil' : item === 'rawFish' ? 'item_raw_fish' : 'item_cooked_fish'
+    const spriteStyle = getSpriteBackgroundStyle(icon)
     return `
       <div class="slot">
-        <canvas class="slot-icon" data-sprite="${icon}" width="44" height="44"></canvas>
+        <div class="slot-icon" style="${spriteStyle}"></div>
         <span>${itemLabels[item]}</span>
         <strong>${inventory[item]}</strong>
       </div>
     `
   }).join('')
+}
 
-  inventoryGrid.querySelectorAll<HTMLCanvasElement>('.slot-icon').forEach((slotCanvas) => {
-    const slotCtx = slotCanvas.getContext('2d')
-    const name = slotCanvas.dataset.sprite as SpriteName | undefined
-    if (!slotCtx || !name || !sprite.complete) {
-      return
-    }
-    const oldCtx = ctx.getTransform()
-    const source = spriteRenderer.getSourceRect(name)
-    slotCtx.clearRect(0, 0, 44, 44)
-    slotCtx.drawImage(
-      sprite,
-      source.x,
-      source.y,
-      source.w,
-      source.h,
-      4,
-      4,
-      36,
-      36,
-    )
-    ctx.setTransform(oldCtx)
-  })
+function getSpriteBackgroundStyle(name: SpriteName): string {
+  const frame = frames[name]
+  const positionX = frame.x / (1 - frame.w) * 100
+  const positionY = frame.y / (1 - frame.h) * 100
+  const sizeX = 100 / frame.w
+  const sizeY = 100 / frame.h
+
+  return [
+    `--slot-sprite: url(${spriteUrl})`,
+    `--slot-position: ${positionX.toFixed(4)}% ${positionY.toFixed(4)}%`,
+    `--slot-size: ${sizeX.toFixed(4)}% ${sizeY.toFixed(4)}%`,
+  ].join(';')
 }
 
 function checkGoal(): void {
@@ -949,7 +936,6 @@ setDisplayScale(displayScale)
 resize()
 setupEvents()
 renderInventory()
-sprite.addEventListener('load', renderInventory)
 if (!skipFullscreenPrompt) {
   void requestFullscreenIfNeeded()
 }
