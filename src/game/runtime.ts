@@ -57,6 +57,7 @@ const buildings = new Map<string, Building>()
 const floats: Floating[] = []
 const keys = new Set<string>()
 const camera: Vec = { x: 0, y: 0 }
+const skipFullscreenPrompt = /SM-/i.test(navigator.userAgent)
 const pointerAim: Vec = { x: 1, y: 0 }
 const moveInput: Vec = { x: 0, y: 0 }
 const player: Vec & { facing: 'down' | 'up' | 'left' | 'right'; moving: boolean; walkTime: number } = {
@@ -89,7 +90,7 @@ let lastMoveDir: Vec = { x: 0, y: 1 }
 let toastTimer = 0
 let completed = false
 let joystickPointer: number | null = null
-let displayScale = Number(displayScaleInput.value) || 0.7
+let displayScale = Number(window.localStorage.getItem('raft-display-scale') ?? displayScaleInput.value) || 0.7
 let fullscreenRequested = false
 
 for (let gx = -1; gx <= 1; gx += 1) {
@@ -132,6 +133,7 @@ function setDisplayScale(value: number): void {
   document.documentElement.style.setProperty('--display-scale', String(displayScale))
   displayScaleInput.value = String(displayScale)
   displayScaleValue.textContent = `${Math.round(displayScale * 100)}%`
+  window.localStorage.setItem('raft-display-scale', String(displayScale))
 }
 
 function toggleOrientationLayout(): void {
@@ -140,6 +142,12 @@ function toggleOrientationLayout(): void {
 }
 
 async function requestFullscreenIfNeeded(): Promise<void> {
+  if (skipFullscreenPrompt) {
+    fullscreenPrompt.classList.add('hidden')
+    fullscreenRequested = false
+    return
+  }
+
   if (fullscreenRequested) {
     return
   }
@@ -831,9 +839,16 @@ function loop(now: number): void {
 
 function setupEvents(): void {
   window.addEventListener('resize', resize)
-  window.addEventListener('pointerdown', () => void requestFullscreenIfNeeded(), { once: true })
-  window.addEventListener('keydown', () => void requestFullscreenIfNeeded(), { once: true })
+  if (!skipFullscreenPrompt) {
+    window.addEventListener('pointerdown', () => void requestFullscreenIfNeeded(), { once: true })
+    window.addEventListener('keydown', () => void requestFullscreenIfNeeded(), { once: true })
+  }
   document.addEventListener('fullscreenchange', () => {
+    if (skipFullscreenPrompt) {
+      fullscreenPrompt.classList.add('hidden')
+      fullscreenRequested = false
+      return
+    }
     fullscreenPrompt.classList.toggle('hidden', Boolean(document.fullscreenElement))
     fullscreenRequested = Boolean(document.fullscreenElement)
   })
@@ -935,7 +950,9 @@ resize()
 setupEvents()
 renderInventory()
 sprite.addEventListener('load', renderInventory)
-void requestFullscreenIfNeeded()
+if (!skipFullscreenPrompt) {
+  void requestFullscreenIfNeeded()
+}
 requestAnimationFrame(loop)
 
 

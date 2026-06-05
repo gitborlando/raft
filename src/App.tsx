@@ -440,7 +440,7 @@ export const App = observer(function App({ store }: AppProps) {
   return (
     <div className={shell}>
       <div id="game-stage" className="game-stage">
-        <div id="fullscreen-prompt" className="fullscreen-prompt">
+        <div id="fullscreen-prompt" className="fullscreen-prompt hidden">
           <button id="fullscreen-button" type="button">
             游戏需要全屏
           </button>
