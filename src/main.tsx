@@ -1,5 +1,8 @@
-import './style.css'
+import { flushSync } from 'react-dom'
+import { createRoot } from 'react-dom/client'
+import { App } from './App'
 import spriteUrl from './assets/spirte.png'
+import { uiStore } from './uiStore'
 
 type Item = 'wood' | 'plastic' | 'leaf' | 'rope' | 'rawFish' | 'cookedFish'
 type FloatKind = 'wood' | 'plastic' | 'leaf' | 'crate'
@@ -143,52 +146,10 @@ if (!app) {
   throw new Error('Missing #app element')
 }
 
-app.innerHTML = `
-  <canvas id="game" aria-label="Raft mobile MVP"></canvas>
-  <div class="top-hud">
-    <div class="hunger">
-      <span>饥饿</span>
-      <div class="bar"><i id="hunger-fill"></i></div>
-      <strong id="hunger-value">100</strong>
-    </div>
-    <button id="bag-toggle" class="icon-button" type="button" aria-label="打开背包">包</button>
-  </div>
-  <div id="toast" class="toast"></div>
-  <section id="landscape-prompt" class="landscape-prompt hidden">
-    <div>
-      <strong>建议横屏游玩</strong>
-      <p>横屏视野更大，投钩和建造更方便。</p>
-      <button id="landscape-button" type="button">横屏开始</button>
-    </div>
-  </section>
-  <section id="goal-panel" class="goal-panel">
-    <strong>V0.5 目标</strong>
-    <span id="goal-text"></span>
-  </section>
-  <section id="inventory-panel" class="panel inventory-panel hidden">
-    <header><strong>背包</strong><button class="close-panel" data-close="inventory" type="button">关闭</button></header>
-    <div id="inventory-grid" class="inventory-grid"></div>
-  </section>
-  <section id="build-panel" class="panel build-panel hidden">
-    <header><strong>建造 / 合成</strong><button class="close-panel" data-close="build" type="button">关闭</button></header>
-    <div class="build-actions">
-      <button data-craft="rope" type="button">合成绳子<br><small>树叶 x2</small></button>
-      <button data-craft="floor" type="button">扩建地板<br><small>木板 x2</small></button>
-      <button data-craft="grill" type="button">烤架<br><small>木板 x4 塑料 x2 绳子 x1</small></button>
-      <button data-craft="storage" type="button">储物箱<br><small>木板 x6 塑料 x2</small></button>
-      <button data-craft="net" type="button">收集网<br><small>木板 x3 塑料 x2 绳子 x2</small></button>
-    </div>
-  </section>
-  <div class="bottom-controls">
-    <div id="stick" class="stick"><i></i></div>
-    <div class="action-cluster">
-      <button id="hook-button" class="action primary" type="button">投钩</button>
-      <button id="interact-button" class="action" type="button">互动</button>
-      <button id="eat-button" class="action" type="button">吃鱼</button>
-      <button id="build-toggle" class="action" type="button">建造</button>
-    </div>
-  </div>
-`
+const root = createRoot(app)
+flushSync(() => {
+  root.render(<App store={uiStore} />)
+})
 
 function queryRequired<T extends Element>(selector: string): T {
   const element = document.querySelector<T>(selector)
@@ -263,7 +224,7 @@ let lastMoveDir: Vec = { x: 0, y: 1 }
 let toastTimer = 0
 let completed = false
 let joystickPointer: number | null = null
-let landscapePromptSeen = window.localStorage.getItem('raft-landscape-prompt-seen') === '1'
+let landscapePromptSeen = uiStore.landscapePromptSeen
 
 for (let gx = -1; gx <= 1; gx += 1) {
   for (let gy = -1; gy <= 1; gy += 1) {
@@ -1031,8 +992,8 @@ function togglePanel(panel: HTMLElement): void {
 }
 
 async function acceptLandscapePrompt(): Promise<void> {
+  uiStore.markLandscapePromptSeen()
   landscapePromptSeen = true
-  window.localStorage.setItem('raft-landscape-prompt-seen', '1')
   landscapePrompt.classList.add('hidden')
 
   try {
