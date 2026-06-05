@@ -1,10 +1,10 @@
 [
   {
     "id": 1,
-    "name": "char_idle_front",
+    "name": "chara_front_idle",
     "category": "character",
-    "desc": "主角正面站立待机",
-    "when": "角色静止不动时",
+    "desc": "角色正面站立，身穿短袖短裤，背着背包",
+    "when": "角色处于正面静止闲置状态时使用",
     "bound": {
       "x": 0.043575,
       "y": 0.018933,
@@ -14,10 +14,10 @@
   },
   {
     "id": 2,
-    "name": "char_idle_back",
+    "name": "chara_back_idle",
     "category": "character",
-    "desc": "主角背面站立待机",
-    "when": "角色背对镜头静止时",
+    "desc": "角色背面站立，露出背包背影",
+    "when": "角色背对镜头静止时使用",
     "bound": {
       "x": 0.189808,
       "y": 0.018933,
@@ -27,10 +27,10 @@
   },
   {
     "id": 3,
-    "name": "char_side_stand",
+    "name": "chara_side_idle_right",
     "category": "character",
-    "desc": "主角侧身站立",
-    "when": "角色侧向移动或静止时",
+    "desc": "角色右侧面站立",
+    "when": "角色向右看或静止时使用",
     "bound": {
       "x": 0.337518,
       "y": 0.019793,
@@ -40,10 +40,10 @@
   },
   {
     "id": 4,
-    "name": "char_side_walk",
+    "name": "chara_side_idle_left",
     "category": "character",
-    "desc": "主角侧身行走",
-    "when": "角色侧向移动时",
+    "desc": "角色左侧面站立",
+    "when": "角色向左看或静止时使用",
     "bound": {
       "x": 0.467504,
       "y": 0.018072,
@@ -53,10 +53,10 @@
   },
   {
     "id": 5,
-    "name": "char_front_walk",
+    "name": "chara_front_walk",
     "category": "character",
-    "desc": "主角正面行走",
-    "when": "角色向下移动时",
+    "desc": "角色正面迈步走姿",
+    "when": "角色向下移动时使用",
     "bound": {
       "x": 0.607829,
       "y": 0.019793,
@@ -66,10 +66,10 @@
   },
   {
     "id": 6,
-    "name": "char_back_walk",
+    "name": "chara_back_walk",
     "category": "character",
-    "desc": "主角背面行走",
-    "when": "角色向上移动时",
+    "desc": "角色背面迈步走姿",
+    "when": "角色向上移动时使用",
     "bound": {
       "x": 0.745199,
       "y": 0.018933,
@@ -79,10 +79,10 @@
   },
   {
     "id": 7,
-    "name": "char_side_run",
+    "name": "chara_side_walk",
     "category": "character",
-    "desc": "主角侧身奔跑",
-    "when": "角色快速移动时",
+    "desc": "角色侧面走姿",
+    "when": "角色左右方向移动时使用",
     "bound": {
       "x": 0.881832,
       "y": 0.018933,
@@ -92,10 +92,10 @@
   },
   {
     "id": 8,
-    "name": "char_side_run_2",
+    "name": "chara_side_run",
     "category": "character",
-    "desc": "主角侧身奔跑姿态2",
-    "when": "角色跑动动画帧",
+    "desc": "角色侧面向前奔跑姿势",
+    "when": "角色侧向快速移动时使用",
     "bound": {
       "x": 0.033973,
       "y": 0.195353,
@@ -105,10 +105,10 @@
   },
   {
     "id": 9,
-    "name": "char_punch",
+    "name": "chara_punch_front",
     "category": "character",
-    "desc": "主角出拳动作",
-    "when": "角色进行攻击时",
+    "desc": "角色正面挥拳攻击姿势",
+    "when": "角色面向前进行近战攻击时使用",
     "bound": {
       "x": 0.17873,
       "y": 0.193632,
@@ -118,10 +118,10 @@
   },
   {
     "id": 10,
-    "name": "char_side_idle",
+    "name": "chara_punch_side",
     "category": "character",
-    "desc": "主角侧身待机",
-    "when": "角色侧向静止时",
+    "desc": "角色侧面挥拳攻击姿势",
+    "when": "角色向侧面进行近战攻击时使用",
     "bound": {
       "x": 0.320532,
       "y": 0.194492,
@@ -131,10 +131,10 @@
   },
   {
     "id": 11,
-    "name": "wood_planks",
+    "name": "tile_wood_floor",
     "category": "environment",
-    "desc": "木板堆",
-    "when": "作为场景装饰或收集物时",
+    "desc": "无边框的木质地板铺设贴图",
+    "when": "作为大面积拼接的木船地板或营地平台时使用",
     "bound": {
       "x": 0.452733,
       "y": 0.198795,
@@ -144,10 +144,10 @@
   },
   {
     "id": 12,
-    "name": "wooden_sign",
+    "name": "tile_wood_edge",
     "category": "environment",
-    "desc": "木制告示牌",
-    "when": "放置在场景中作为指引或提示",
+    "desc": "带有绑绳和边框的木质地板贴图",
+    "when": "作为木筏或平台的边缘部分时使用",
     "bound": {
       "x": 0.590103,
       "y": 0.198795,
@@ -157,10 +157,10 @@
   },
   {
     "id": 13,
-    "name": "water_tile_1",
-    "category": "terrain",
-    "desc": "水面瓦片",
-    "when": "构建水域地形时",
+    "name": "tile_water_1",
+    "category": "environment",
+    "desc": "深蓝色的水面波动纹理图块1",
+    "when": "大面积海洋水体拼接时使用",
     "bound": {
       "x": 0.728951,
       "y": 0.199656,
@@ -170,10 +170,10 @@
   },
   {
     "id": 14,
-    "name": "water_tile_2",
-    "category": "terrain",
-    "desc": "水面瓦片",
-    "when": "构建水域地形时",
+    "name": "tile_water_2",
+    "category": "environment",
+    "desc": "深蓝色的水面波动纹理图块2",
+    "when": "大面积海洋水体拼接时交替使用以丰富视觉效果",
     "bound": {
       "x": 0.862629,
       "y": 0.199656,
@@ -183,10 +183,10 @@
   },
   {
     "id": 15,
-    "name": "wave_icon",
-    "category": "effect",
-    "desc": "海浪图标",
-    "when": "表示水面波动或海岸线",
+    "name": "tile_water_wave",
+    "category": "environment",
+    "desc": "带有白色浪花的水波纹理图块",
+    "when": "表现水流、海浪或者船只划过时的水效时使用",
     "bound": {
       "x": 0.024372,
       "y": 0.370912,
@@ -196,10 +196,10 @@
   },
   {
     "id": 16,
-    "name": "logs_pile",
-    "category": "item",
-    "desc": "木头堆",
-    "when": "作为可采集资源时",
+    "name": "item_wood_bundle",
+    "category": "resource",
+    "desc": "一捆绑好的木柴",
+    "when": "玩家收集并获得基础木柴资源时使用",
     "bound": {
       "x": 0.177253,
       "y": 0.385542,
@@ -209,10 +209,10 @@
   },
   {
     "id": 17,
-    "name": "water_bottle",
+    "name": "item_water_bottle",
     "category": "item",
-    "desc": "塑料水瓶",
-    "when": "作为可拾取道具或垃圾时",
+    "desc": "一个透明塑料纯净水瓶",
+    "when": "玩家收集淡水、补充口渴度或在背包中显示时使用",
     "bound": {
       "x": 0.311669,
       "y": 0.375215,
@@ -222,10 +222,10 @@
   },
   {
     "id": 18,
-    "name": "palm_leaf",
-    "category": "item",
-    "desc": "棕榈叶",
-    "when": "作为采集材料时",
+    "name": "item_palm_leaf",
+    "category": "resource",
+    "desc": "一片巨大的绿色棕榈树叶",
+    "when": "玩家采集到叶子，用于制作绳索或遮阳蓬时使用",
     "bound": {
       "x": 0.463811,
       "y": 0.376936,
@@ -235,10 +235,10 @@
   },
   {
     "id": 19,
-    "name": "wooden_crate",
-    "category": "item",
-    "desc": "木箱",
-    "when": "作为容器或障碍物时",
+    "name": "item_wood_crate",
+    "category": "container",
+    "desc": "一个结实的木质板条箱",
+    "when": "在海面上漂浮作为补给箱，或作为场景障碍物时使用",
     "bound": {
       "x": 0.595273,
       "y": 0.366609,
@@ -248,10 +248,10 @@
   },
   {
     "id": 20,
-    "name": "grill_empty",
-    "category": "furniture",
-    "desc": "空烤架",
-    "when": "烹饪系统中的交互设备",
+    "name": "prop_grill_empty",
+    "category": "building",
+    "desc": "石块砌成的野外烧烤架，上面有空铁网",
+    "when": "玩家建造好烹饪设施，处于闲置状态时使用",
     "bound": {
       "x": 0.722304,
       "y": 0.370912,
@@ -261,10 +261,10 @@
   },
   {
     "id": 21,
-    "name": "grill_fish",
-    "category": "furniture",
-    "desc": "烤架上的鱼",
-    "when": "烹饪鱼类食物时",
+    "name": "prop_grill_raw_fish",
+    "category": "building",
+    "desc": "烧烤架上正在烤一条生的红色鱼",
+    "when": "玩家开始烤鱼，处于烹饪过程中使用",
     "bound": {
       "x": 0.862629,
       "y": 0.370912,
@@ -274,10 +274,10 @@
   },
   {
     "id": 22,
-    "name": "grill_fire",
-    "category": "furniture",
-    "desc": "带火烤架",
-    "when": "正在进行烹饪时",
+    "name": "prop_grill_cooked_fish",
+    "category": "building",
+    "desc": "烧烤架上烤熟的黄色鱼，下面有火苗",
+    "when": "食物烤熟，提示玩家可以拾取时使用",
     "bound": {
       "x": 0.019202,
       "y": 0.532702,
@@ -287,10 +287,10 @@
   },
   {
     "id": 23,
-    "name": "chest_closed",
-    "category": "furniture",
-    "desc": "关闭的宝箱",
-    "when": "场景内的容器",
+    "name": "prop_chest_closed",
+    "category": "container",
+    "desc": "一个闭合的木质藏宝箱",
+    "when": "场景中放置未开启的宝箱时使用",
     "bound": {
       "x": 0.17356,
       "y": 0.54389,
@@ -300,10 +300,10 @@
   },
   {
     "id": 24,
-    "name": "chest_open",
-    "category": "furniture",
-    "desc": "打开的宝箱",
-    "when": "打开宝箱获取物品时",
+    "name": "prop_chest_open",
+    "category": "container",
+    "desc": "一个盖子打开的空木箱",
+    "when": "宝箱被玩家成功开启后使用",
     "bound": {
       "x": 0.316839,
       "y": 0.530981,
@@ -313,10 +313,10 @@
   },
   {
     "id": 25,
-    "name": "fishing_trap",
-    "category": "furniture",
-    "desc": "捕鱼陷阱",
-    "when": "放置在水中进行捕鱼时",
+    "name": "prop_fish_net",
+    "category": "building",
+    "desc": "固定在水面上的方形渔网捕鱼陷阱",
+    "when": "玩家在海中布置的自动捕鱼装置工作时使用",
     "bound": {
       "x": 0.450517,
       "y": 0.536145,
@@ -326,10 +326,10 @@
   },
   {
     "id": 26,
-    "name": "wooden_plank_single",
-    "category": "item",
-    "desc": "单块木板",
-    "when": "作为建筑材料时",
+    "name": "item_single_plank",
+    "category": "resource",
+    "desc": "一块平整的木板",
+    "when": "作为建筑材料、修理筏子的合成原料时显示在背包中",
     "bound": {
       "x": 0.601182,
       "y": 0.543029,
@@ -339,10 +339,10 @@
   },
   {
     "id": 27,
-    "name": "paper_scrap",
-    "category": "item",
-    "desc": "纸片",
-    "when": "作为可拾取信息或废弃物时",
+    "name": "item_plastic_waste",
+    "category": "resource",
+    "desc": "一团揉皱的塑料垃圾碎片",
+    "when": "玩家捞起海洋废弃塑料，用于合成工业制品时使用",
     "bound": {
       "x": 0.731905,
       "y": 0.540448,
@@ -352,10 +352,10 @@
   },
   {
     "id": 28,
-    "name": "leaf",
-    "category": "item",
-    "desc": "叶子",
-    "when": "作为植物材料时",
+    "name": "item_small_leaf",
+    "category": "resource",
+    "desc": "一片小绿叶",
+    "when": "基础植物纤维或叶子资源图标",
     "bound": {
       "x": 0.884047,
       "y": 0.540448,
@@ -365,10 +365,10 @@
   },
   {
     "id": 29,
-    "name": "rope_coil",
+    "name": "item_rope_coil",
     "category": "item",
-    "desc": "绳索卷",
-    "when": "作为制作材料时",
+    "desc": "一卷粗糙的合成麻绳",
+    "when": "玩家制作出绳索，或用于建筑升级、捆绑等配方时使用",
     "bound": {
       "x": 0.031019,
       "y": 0.709122,
@@ -378,10 +378,10 @@
   },
   {
     "id": 30,
-    "name": "fish_raw",
-    "category": "item",
-    "desc": "生鱼",
-    "when": "作为食物材料时",
+    "name": "item_raw_fish",
+    "category": "food",
+    "desc": "一条新鲜的蓝色海鱼",
+    "when": "钓鱼成功或捕获生鱼，在背包中作为食材显示时使用",
     "bound": {
       "x": 0.17356,
       "y": 0.704819,
@@ -391,10 +391,10 @@
   },
   {
     "id": 31,
-    "name": "fish_cooked",
-    "category": "item",
-    "desc": "烤鱼",
-    "when": "作为可恢复体力的食物时",
+    "name": "item_cooked_fish",
+    "category": "food",
+    "desc": "一条烤得金黄焦脆的熟鱼",
+    "when": "鱼肉烹饪完成，作为可食用回复道具显示时使用",
     "bound": {
       "x": 0.316839,
       "y": 0.70568,
@@ -404,10 +404,10 @@
   },
   {
     "id": 32,
-    "name": "box_container",
-    "category": "item",
-    "desc": "储物盒",
-    "when": "存放物品时",
+    "name": "prop_small_box",
+    "category": "container",
+    "desc": "一个小型方形木盒子",
+    "when": "作为小型储物盒、零件箱或场景装饰时使用",
     "bound": {
       "x": 0.458641,
       "y": 0.703959,
@@ -417,10 +417,10 @@
   },
   {
     "id": 33,
-    "name": "hook_tool",
+    "name": "tool_iron_hook",
     "category": "tool",
-    "desc": "钩子",
-    "when": "作为工具或武器时",
+    "desc": "一把带有木柄的生铁钩爪",
+    "when": "玩家使用钩子抓取海面漂浮物，或装备该工具时使用",
     "bound": {
       "x": 0.59675,
       "y": 0.694492,
@@ -430,10 +430,10 @@
   },
   {
     "id": 34,
-    "name": "hammer_tool",
+    "name": "tool_stone_hammer",
     "category": "tool",
-    "desc": "锤子",
-    "when": "进行建筑或敲击操作时",
+    "desc": "一把用木棍和石头绑制的简易石锤",
+    "when": "玩家进行建造、修理或者装备该建造工具时使用",
     "bound": {
       "x": 0.732644,
       "y": 0.695353,
@@ -443,10 +443,10 @@
   },
   {
     "id": 35,
-    "name": "food_icon",
-    "category": "item",
-    "desc": "鸡腿图标",
-    "when": "作为食物物品图标时",
+    "name": "item_meat_plate",
+    "category": "food",
+    "desc": "一盘烤好的大鸡腿食物",
+    "when": "高等级饱食度回复食物，在背包或快捷栏中显示",
     "bound": {
       "x": 0.872969,
       "y": 0.695353,
@@ -456,10 +456,10 @@
   },
   {
     "id": 36,
-    "name": "ui_frame_square",
+    "name": "ui_frame_plain",
     "category": "ui",
-    "desc": "方形UI框",
-    "when": "显示物品栏或按钮背景",
+    "desc": "木纹质感的简单方形UI边框",
+    "when": "作为通用道具格子背景、选项背景时使用",
     "bound": {
       "x": 0.026588,
       "y": 0.849398,
@@ -469,10 +469,10 @@
   },
   {
     "id": 37,
-    "name": "ui_frame_corner",
+    "name": "ui_frame_corners",
     "category": "ui",
-    "desc": "带角方形UI框",
-    "when": "显示物品栏或详细信息面板",
+    "desc": "四角带有白色直角修饰的木纹UI框",
+    "when": "用于突出显示选中的道具栏或焦点目标时使用",
     "bound": {
       "x": 0.158789,
       "y": 0.843373,
@@ -482,10 +482,10 @@
   },
   {
     "id": 38,
-    "name": "ui_frame_rounded",
+    "name": "ui_frame_rope",
     "category": "ui",
-    "desc": "圆角方形UI框",
-    "when": "作为菜单或弹窗背景",
+    "desc": "四边绑有绳索的木质广告牌UI框",
+    "when": "游戏内告示牌、任务说明或主菜单按钮背景时使用",
     "bound": {
       "x": 0.299852,
       "y": 0.849398,
@@ -495,10 +495,10 @@
   },
   {
     "id": 39,
-    "name": "ui_btn_pill",
+    "name": "ui_frame_large",
     "category": "ui",
-    "desc": "长方形按钮",
-    "when": "作为UI菜单的按钮",
+    "desc": "无装饰的方形大木板底页",
+    "when": "作为设置面板、合成表、背包界面的底图时使用",
     "bound": {
       "x": 0.576809,
       "y": 0.843373,
@@ -508,10 +508,10 @@
   },
   {
     "id": 40,
-    "name": "ui_panel_large",
+    "name": "ui_button_wood",
     "category": "ui",
-    "desc": "大型UI背景框",
-    "when": "作为较大的显示面板",
+    "desc": "一块扁长形的长条木板按钮",
+    "when": "作为游戏内通用确认、取消等木质按钮底图使用",
     "bound": {
       "x": 0.445347,
       "y": 0.873494,
@@ -521,10 +521,10 @@
   },
   {
     "id": 41,
-    "name": "ui_bar_dark",
+    "name": "ui_button_dark",
     "category": "ui",
-    "desc": "深色条状UI",
-    "when": "作为进度条底色或装饰线",
+    "desc": "暗褐色的胶囊形长条按钮底槽",
+    "when": "作为按钮的未选中或禁用状态底图时使用",
     "bound": {
       "x": 0.717134,
       "y": 0.888124,
@@ -534,10 +534,10 @@
   },
   {
     "id": 42,
-    "name": "ui_bar_blue",
+    "name": "ui_progress_blue",
     "category": "ui",
-    "desc": "蓝色进度条",
-    "when": "显示体力、耐久度等数值",
+    "desc": "亮蓝色的圆角玻璃质感进度条/长条按钮",
+    "when": "作为饱食度、水分等状态指示条的填充物或蓝色功能按钮使用",
     "bound": {
       "x": 0.857459,
       "y": 0.888124,

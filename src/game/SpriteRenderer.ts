@@ -33,6 +33,24 @@ export class SpriteRenderer {
     this.ctx.restore()
   }
 
+  drawRotated(name: SpriteName, x: number, y: number, size: number, angle: number): void {
+    if (!this.image.complete || this.image.naturalWidth === 0) {
+      this.drawFallback(name, x, y, size)
+      return
+    }
+
+    const source = this.getSourceRect(name)
+    const aspect = source.w / source.h
+    const drawW = size * aspect
+    const drawH = size
+
+    this.ctx.save()
+    this.ctx.translate(x, y)
+    this.ctx.rotate(angle)
+    this.ctx.drawImage(this.image, source.x, source.y, source.w, source.h, -drawW / 2, -drawH / 2, drawW, drawH)
+    this.ctx.restore()
+  }
+
   drawRect(name: SpriteName, x: number, y: number, w: number, h: number): void {
     if (!this.image.complete || this.image.naturalWidth === 0) {
       this.drawFallback(name, x + w / 2, y + h / 2, Math.max(w, h))

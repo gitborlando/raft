@@ -13,7 +13,7 @@ import {
   itemLabels,
 } from './constants'
 import { queryRequired } from './dom'
-import { axisDir, dist, normalize, normalizeInput, tileCenter, tileFromWorld, tileKey } from './geometry'
+import { axisDir, dist, distanceToSegment, normalize, normalizeInput, tileCenter, tileFromWorld, tileKey } from './geometry'
 import type { Building, BuildingKind, FloatKind, Floating, Hook, Item, SpriteName, Vec } from './types'
 
 
@@ -56,16 +56,19 @@ const keys = new Set<string>()
 const camera: Vec = { x: 0, y: 0 }
 const pointerAim: Vec = { x: 1, y: 0 }
 const moveInput: Vec = { x: 0, y: 0 }
-const player: Vec & { facing: 'down' | 'up' | 'left' | 'right'; moving: boolean } = {
+const player: Vec & { facing: 'down' | 'up' | 'left' | 'right'; moving: boolean; walkTime: number } = {
   x: 0,
   y: 0,
   facing: 'down',
   moving: false,
+  walkTime: 0,
 }
 const hook: Hook = {
   state: 'idle',
   x: 0,
   y: 0,
+  prevX: 0,
+  prevY: 0,
   dir: { x: 1, y: 0 },
   maxX: 0,
   maxY: 0,
@@ -207,6 +210,8 @@ function throwHook(target: Vec): void {
   hook.state = 'flying'
   hook.x = player.x
   hook.y = player.y
+  hook.prevX = player.x
+  hook.prevY = player.y
   hook.dir = dir
   hook.maxX = player.x + dir.x * HOOK_MAX
   hook.maxY = player.y + dir.y * HOOK_MAX
@@ -411,6 +416,7 @@ function update(dt: number): void {
   const speed = 132
   player.moving = Math.abs(input.x) > 0.01 || Math.abs(input.y) > 0.01
   if (player.moving) {
+    player.walkTime += dt
     lastMoveDir = { x: input.x, y: input.y }
     if (Math.abs(input.x) > Math.abs(input.y)) {
       player.facing = input.x > 0 ? 'right' : 'left'
@@ -418,6 +424,8 @@ function update(dt: number): void {
       player.facing = input.y > 0 ? 'down' : 'up'
     }
     movePlayer(input.x * speed * dt, input.y * speed * dt)
+  } else {
+    player.walkTime = 0
   }
 
   updateFloats(dt)
@@ -499,14 +507,18 @@ function updateHook(dt: number): void {
   if (hook.state === 'idle') {
     hook.x = player.x
     hook.y = player.y
+    hook.prevX = player.x
+    hook.prevY = player.y
     return
   }
 
   if (hook.state === 'flying') {
+    hook.prevX = hook.x
+    hook.prevY = hook.y
     hook.x += hook.dir.x * HOOK_OUT_SPEED * dt
     hook.y += hook.dir.y * HOOK_OUT_SPEED * dt
     for (const floating of floats) {
-      if (!floating.captured && dist(hook, floating) < FLOAT_RADIUS) {
+      if (!floating.captured && distanceToSegment(floating, { x: hook.prevX, y: hook.prevY }, hook) < FLOAT_RADIUS) {
         hook.attachedId = floating.id
         floating.captured = true
         hook.state = 'returning'
@@ -517,6 +529,8 @@ function updateHook(dt: number): void {
       hook.state = 'returning'
     }
   } else {
+    hook.prevX = hook.x
+    hook.prevY = hook.y
     const toPlayer = normalize({ x: player.x - hook.x, y: player.y - hook.y })
     hook.x += toPlayer.x * HOOK_BACK_SPEED * dt
     hook.y += toPlayer.y * HOOK_BACK_SPEED * dt
@@ -563,8 +577,8 @@ function updateHud(dt: number): void {
 function draw(): void {
   ctx.clearRect(0, 0, width, height)
   drawOcean()
-  drawRaft()
   drawFloats()
+  drawRaft()
   drawHook()
   drawPlayer()
 }
@@ -582,7 +596,7 @@ function drawOcean(): void {
   const offsetY = ((-camera.y * 0.18) % tileSize) - tileSize
   for (let y = offsetY; y < height + tileSize; y += tileSize) {
     for (let x = offsetX; x < width + tileSize; x += tileSize) {
-      const frameName = (Math.floor((x - offsetX) / tileSize) + Math.floor((y - offsetY) / tileSize)) % 2 === 0 ? 'water_tile_1' : 'water_tile_2'
+      const frameName = (Math.floor((x - offsetX) / tileSize) + Math.floor((y - offsetY) / tileSize)) % 2 === 0 ? 'tile_water_1' : 'tile_water_2'
       ctx.globalAlpha = 0.38
       spriteRenderer.drawRect(frameName, x - 1, y - 1, tileSize + 2, tileSize + 2)
       ctx.globalAlpha = 1
@@ -603,14 +617,14 @@ function drawRaft(): void {
     const screen = worldToScreen(tileCenter(Number(xRaw), Number(yRaw)))
     if (building.kind === 'grill') {
       const state = building.grill?.state ?? 'empty'
-      spriteRenderer.draw(state === 'empty' ? 'grill_empty' : state === 'cooking' ? 'grill_fire' : 'grill_fish', screen.x, screen.y - 5, 58)
+      spriteRenderer.draw(state === 'empty' ? 'prop_grill_empty' : state === 'cooking' ? 'prop_grill_raw_fish' : 'prop_grill_cooked_fish', screen.x, screen.y - 5, 58)
       if (state === 'cooking' && building.grill) {
         drawProgress(screen.x - 25, screen.y + 27, 50, building.grill.timer / 8)
       }
     } else if (building.kind === 'storage') {
-      spriteRenderer.draw('chest_closed', screen.x, screen.y - 4, 54)
+      spriteRenderer.draw('prop_chest_closed', screen.x, screen.y - 4, 54)
     } else {
-      spriteRenderer.draw('fishing_trap', screen.x, screen.y, 58)
+      spriteRenderer.draw('prop_fish_net', screen.x, screen.y, 58)
     }
   })
 }
@@ -618,7 +632,7 @@ function drawRaft(): void {
 function drawFloorTile(x: number, y: number): void {
   ctx.save()
   ctx.translate(x, y)
-  spriteRenderer.drawRect('wood_planks', -TILE / 2, -TILE / 2, TILE, TILE)
+  spriteRenderer.drawRect('tile_wood_floor', -TILE / 2, -TILE / 2, TILE, TILE)
   ctx.restore()
 }
 
@@ -646,12 +660,12 @@ function drawFloats(): void {
     const screen = worldToScreen(floating)
     const name: SpriteName =
       floating.kind === 'wood'
-        ? 'wooden_plank_single'
+        ? 'item_single_plank'
         : floating.kind === 'plastic'
-          ? 'water_bottle'
+          ? 'item_plastic_waste'
           : floating.kind === 'leaf'
-            ? 'palm_leaf'
-            : 'wooden_crate'
+            ? 'item_palm_leaf'
+            : 'item_wood_crate'
     spriteRenderer.draw(name, screen.x, screen.y, floating.size)
   }
 }
@@ -668,34 +682,40 @@ function drawHook(): void {
   ctx.moveTo(playerScreen.x, playerScreen.y)
   ctx.lineTo(hookScreen.x, hookScreen.y)
   ctx.stroke()
-  spriteRenderer.draw('hook_tool', hookScreen.x, hookScreen.y, 38)
+  spriteRenderer.drawRotated('tool_iron_hook', hookScreen.x, hookScreen.y, 38, Math.atan2(hook.dir.y, hook.dir.x) + Math.PI / 2)
 }
 
 function drawPlayer(): void {
   const screen = worldToScreen(player)
+  const showWalkFrame = player.moving && Math.floor(player.walkTime / 0.16) % 2 === 0
   const spriteName: SpriteName =
     player.facing === 'up'
-      ? player.moving
-        ? 'char_back_walk'
-        : 'char_idle_back'
+      ? showWalkFrame
+        ? 'chara_back_walk'
+        : 'chara_back_idle'
       : player.facing === 'down'
-        ? player.moving
-          ? 'char_front_walk'
-          : 'char_idle_front'
-        : player.moving
-          ? 'char_side_walk'
-          : 'char_side_stand'
+        ? showWalkFrame
+          ? 'chara_front_walk'
+          : 'chara_front_idle'
+        : player.facing === 'left'
+          ? showWalkFrame
+            ? 'chara_side_walk'
+            : 'chara_side_idle_right'
+          : showWalkFrame
+            ? 'chara_side_walk'
+            : 'chara_side_idle_left'
+  const flipPlayer = player.facing === 'left' && spriteName === 'chara_side_walk'
 
   ctx.fillStyle = 'rgba(0, 0, 0, 0.18)'
   ctx.beginPath()
   ctx.ellipse(screen.x, screen.y + 23, 18, 8, 0, 0, Math.PI * 2)
   ctx.fill()
-  spriteRenderer.draw(spriteName, screen.x, screen.y - 10, 74, player.facing === 'left')
+  spriteRenderer.draw(spriteName, screen.x, screen.y - 10, 74, flipPlayer)
 }
 
 function renderInventory(): void {
   inventoryGrid.innerHTML = INVENTORY_ITEMS.map((item) => {
-    const icon = item === 'wood' ? 'wooden_plank_single' : item === 'plastic' ? 'paper_scrap' : item === 'leaf' ? 'leaf' : item === 'rope' ? 'rope_coil' : item === 'rawFish' ? 'fish_raw' : 'fish_cooked'
+    const icon = item === 'wood' ? 'item_single_plank' : item === 'plastic' ? 'item_plastic_waste' : item === 'leaf' ? 'item_small_leaf' : item === 'rope' ? 'item_rope_coil' : item === 'rawFish' ? 'item_raw_fish' : 'item_cooked_fish'
     return `
       <div class="slot">
         <canvas class="slot-icon" data-sprite="${icon}" width="44" height="44"></canvas>
@@ -882,4 +902,5 @@ if (!landscapePromptSeen && window.matchMedia('(orientation: portrait)').matches
 }
 sprite.addEventListener('load', renderInventory)
 requestAnimationFrame(loop)
+
 

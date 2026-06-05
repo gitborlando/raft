@@ -23,6 +23,24 @@ export function dist(a: Vec, b: Vec): number {
   return Math.hypot(a.x - b.x, a.y - b.y)
 }
 
+export function distanceToSegment(point: Vec, start: Vec, end: Vec): number {
+  const dx = end.x - start.x
+  const dy = end.y - start.y
+  const lengthSq = dx * dx + dy * dy
+
+  if (lengthSq <= 0.0001) {
+    return dist(point, start)
+  }
+
+  const t = Math.max(0, Math.min(1, ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSq))
+  const closest = {
+    x: start.x + dx * t,
+    y: start.y + dy * t,
+  }
+
+  return dist(point, closest)
+}
+
 export function normalize(v: Vec): Vec {
   const length = Math.hypot(v.x, v.y)
   if (length < 0.001) {
