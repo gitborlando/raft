@@ -29,6 +29,8 @@ const stick = queryRequired<HTMLElement>('#stick')
 const displayScaleInput = queryRequired<HTMLInputElement>('#display-scale')
 const displayScaleValue = queryRequired<HTMLElement>('#display-scale-value')
 const orientationToggle = queryRequired<HTMLButtonElement>('#orientation-toggle')
+const fullscreenPrompt = queryRequired<HTMLElement>('#fullscreen-prompt')
+const fullscreenButton = queryRequired<HTMLButtonElement>('#fullscreen-button')
 const context = canvas.getContext('2d')
 
 if (!context) {
@@ -88,6 +90,7 @@ let toastTimer = 0
 let completed = false
 let joystickPointer: number | null = null
 let displayScale = Number(displayScaleInput.value) || 0.7
+let fullscreenRequested = false
 
 for (let gx = -1; gx <= 1; gx += 1) {
   for (let gy = -1; gy <= 1; gy += 1) {
@@ -134,6 +137,27 @@ function setDisplayScale(value: number): void {
 function toggleOrientationLayout(): void {
   document.body.classList.toggle('portrait-layout')
   requestAnimationFrame(resize)
+}
+
+async function requestFullscreenIfNeeded(): Promise<void> {
+  if (fullscreenRequested) {
+    return
+  }
+
+  fullscreenRequested = true
+
+  if (document.fullscreenElement) {
+    fullscreenPrompt.classList.add('hidden')
+    return
+  }
+
+  try {
+    await document.documentElement.requestFullscreen()
+    fullscreenPrompt.classList.add('hidden')
+  } catch {
+    fullscreenRequested = false
+    fullscreenPrompt.classList.remove('hidden')
+  }
 }
 
 
@@ -807,6 +831,12 @@ function loop(now: number): void {
 
 function setupEvents(): void {
   window.addEventListener('resize', resize)
+  window.addEventListener('pointerdown', () => void requestFullscreenIfNeeded(), { once: true })
+  window.addEventListener('keydown', () => void requestFullscreenIfNeeded(), { once: true })
+  document.addEventListener('fullscreenchange', () => {
+    fullscreenPrompt.classList.toggle('hidden', Boolean(document.fullscreenElement))
+    fullscreenRequested = Boolean(document.fullscreenElement)
+  })
   window.addEventListener('keydown', (event) => {
     keys.add(event.code)
     if (event.code === 'KeyB') togglePanel(buildPanel)
@@ -837,6 +867,7 @@ function setupEvents(): void {
   })
   document.querySelector('#interact-button')?.addEventListener('click', interact)
   document.querySelector('#eat-button')?.addEventListener('click', eatFish)
+  fullscreenButton.addEventListener('click', () => void requestFullscreenIfNeeded())
   orientationToggle.addEventListener('click', toggleOrientationLayout)
   displayScaleInput.addEventListener('input', () => {
     setDisplayScale(Number(displayScaleInput.value))
@@ -904,6 +935,7 @@ resize()
 setupEvents()
 renderInventory()
 sprite.addEventListener('load', renderInventory)
+void requestFullscreenIfNeeded()
 requestAnimationFrame(loop)
 
 

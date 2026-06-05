@@ -130,6 +130,33 @@ const shell = css`
     display: none;
   }
 
+  :global(.fullscreen-prompt) {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(8, 40, 52, 0.76);
+  }
+
+  :global(.fullscreen-prompt.hidden) {
+    display: none;
+  }
+
+  :global(.fullscreen-prompt button) {
+    min-height: 52px;
+    min-width: 180px;
+    padding: 0 18px;
+    border: 2px solid rgba(64, 37, 22, 0.25);
+    border-radius: 8px;
+    background: #ffbe56;
+    box-shadow: inset 0 -3px rgba(116, 76, 36, 0.24), 0 12px 28px rgba(5, 26, 34, 0.3);
+    color: #352514;
+    font-size: 16px;
+    font-weight: 900;
+  }
+
   :global(body:not(.portrait-layout) .orientation-toggle .landscape-label) {
     display: none;
   }
@@ -413,6 +440,11 @@ export const App = observer(function App({ store }: AppProps) {
   return (
     <div className={shell}>
       <div id="game-stage" className="game-stage">
+        <div id="fullscreen-prompt" className="fullscreen-prompt">
+          <button id="fullscreen-button" type="button">
+            游戏需要全屏
+          </button>
+        </div>
         <div className="scale-control">
           <span>缩放</span>
           <input id="display-scale" type="range" min="0.35" max="1" step="0.05" defaultValue="0.7" />
