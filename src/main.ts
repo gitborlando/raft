@@ -18,7 +18,10 @@ type SpriteName =
   | 'char_front_walk'
   | 'char_back_walk'
   | 'char_side_walk'
+  | 'wood_planks'
   | 'logs_pile'
+  | 'water_tile_1'
+  | 'water_tile_2'
   | 'water_bottle'
   | 'palm_leaf'
   | 'wooden_crate'
@@ -38,6 +41,13 @@ type SpriteName =
   | 'food_icon'
 
 type SpriteFrame = {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+type SourceRect = {
   x: number
   y: number
   w: number
@@ -79,7 +89,6 @@ const HOOK_MAX = 280
 const HOOK_OUT_SPEED = 520
 const HOOK_BACK_SPEED = 470
 const FLOAT_RADIUS = 30
-const HUNGER_DROP = 0.3
 const INVENTORY_ITEMS: Item[] = ['wood', 'plastic', 'leaf', 'rope', 'rawFish', 'cookedFish']
 
 const itemLabels: Record<Item, string> = {
@@ -105,7 +114,10 @@ const frames: Record<SpriteName, SpriteFrame> = {
   char_front_walk: { x: 0.607829, y: 0.019793, w: 0.081241, h: 0.143718 },
   char_back_walk: { x: 0.745199, y: 0.018933, w: 0.078287, h: 0.141997 },
   char_side_walk: { x: 0.467504, y: 0.018072, w: 0.078287, h: 0.142857 },
+  wood_planks: { x: 0.452733, y: 0.198795, w: 0.108567, h: 0.135972 },
   logs_pile: { x: 0.177253, y: 0.385542, w: 0.091581, h: 0.089501 },
+  water_tile_1: { x: 0.728951, y: 0.199656, w: 0.110783, h: 0.134251 },
+  water_tile_2: { x: 0.862629, y: 0.199656, w: 0.110044, h: 0.134251 },
   water_bottle: { x: 0.311669, y: 0.375215, w: 0.089365, h: 0.104131 },
   palm_leaf: { x: 0.463811, y: 0.376936, w: 0.081241, h: 0.095525 },
   wooden_crate: { x: 0.595273, y: 0.366609, w: 0.084195, h: 0.114458 },
@@ -142,6 +154,13 @@ app.innerHTML = `
     <button id="bag-toggle" class="icon-button" type="button" aria-label="打开背包">包</button>
   </div>
   <div id="toast" class="toast"></div>
+  <section id="landscape-prompt" class="landscape-prompt hidden">
+    <div>
+      <strong>建议横屏游玩</strong>
+      <p>横屏视野更大，投钩和建造更方便。</p>
+      <button id="landscape-button" type="button">横屏开始</button>
+    </div>
+  </section>
   <section id="goal-panel" class="goal-panel">
     <strong>V0.5 目标</strong>
     <span id="goal-text"></span>
@@ -188,6 +207,8 @@ const inventoryPanel = queryRequired<HTMLElement>('#inventory-panel')
 const buildPanel = queryRequired<HTMLElement>('#build-panel')
 const goalText = queryRequired<HTMLElement>('#goal-text')
 const stick = queryRequired<HTMLElement>('#stick')
+const landscapePrompt = queryRequired<HTMLElement>('#landscape-prompt')
+const landscapeButton = queryRequired<HTMLButtonElement>('#landscape-button')
 const context = canvas.getContext('2d')
 
 if (!context) {
@@ -242,6 +263,7 @@ let lastMoveDir: Vec = { x: 0, y: 1 }
 let toastTimer = 0
 let completed = false
 let joystickPointer: number | null = null
+let landscapePromptSeen = window.localStorage.getItem('raft-landscape-prompt-seen') === '1'
 
 for (let gx = -1; gx <= 1; gx += 1) {
   for (let gy = -1; gy <= 1; gy += 1) {
@@ -310,12 +332,8 @@ function drawSprite(name: SpriteName, x: number, y: number, size: number, flip =
     return
   }
 
-  const frame = frames[name]
-  const sx = frame.x * sprite.naturalWidth
-  const sy = frame.y * sprite.naturalHeight
-  const sw = frame.w * sprite.naturalWidth
-  const sh = frame.h * sprite.naturalHeight
-  const aspect = sw / sh
+  const source = getSourceRect(name)
+  const aspect = source.w / source.h
   const drawW = size * aspect
   const drawH = size
 
@@ -323,11 +341,31 @@ function drawSprite(name: SpriteName, x: number, y: number, size: number, flip =
   if (flip) {
     ctx.translate(x, y)
     ctx.scale(-1, 1)
-    ctx.drawImage(sprite, sx, sy, sw, sh, -drawW / 2, -drawH / 2, drawW, drawH)
+    ctx.drawImage(sprite, source.x, source.y, source.w, source.h, -drawW / 2, -drawH / 2, drawW, drawH)
   } else {
-    ctx.drawImage(sprite, sx, sy, sw, sh, x - drawW / 2, y - drawH / 2, drawW, drawH)
+    ctx.drawImage(sprite, source.x, source.y, source.w, source.h, x - drawW / 2, y - drawH / 2, drawW, drawH)
   }
   ctx.restore()
+}
+
+function getSourceRect(name: SpriteName): SourceRect {
+  const frame = frames[name]
+  return {
+    x: Math.round(frame.x * sprite.naturalWidth),
+    y: Math.round(frame.y * sprite.naturalHeight),
+    w: Math.round(frame.w * sprite.naturalWidth),
+    h: Math.round(frame.h * sprite.naturalHeight),
+  }
+}
+
+function drawSpriteRect(name: SpriteName, x: number, y: number, w: number, h: number): void {
+  if (!sprite.complete || sprite.naturalWidth === 0) {
+    drawFallback(name, x + w / 2, y + h / 2, Math.max(w, h))
+    return
+  }
+
+  const source = getSourceRect(name)
+  ctx.drawImage(sprite, source.x, source.y, source.w, source.h, x, y, w, h)
 }
 
 function drawFallback(name: SpriteName, x: number, y: number, size: number): void {
@@ -626,9 +664,8 @@ function eatFish(): void {
     return
   }
   inventory.cookedFish -= 1
-  hunger = Math.min(100, hunger + 35)
   renderInventory()
-  showToast('吃下烤鱼，恢复饥饿值')
+  showToast('吃下烤鱼')
 }
 
 function update(dt: number): void {
@@ -637,7 +674,7 @@ function update(dt: number): void {
     x: keyboardInput.x + moveInput.x,
     y: keyboardInput.y + moveInput.y,
   })
-  const speed = hunger <= 0 ? 92 : 132
+  const speed = 132
   player.moving = Math.abs(input.x) > 0.01 || Math.abs(input.y) > 0.01
   if (player.moving) {
     lastMoveDir = { x: input.x, y: input.y }
@@ -647,11 +684,6 @@ function update(dt: number): void {
       player.facing = input.y > 0 ? 'down' : 'up'
     }
     movePlayer(input.x * speed * dt, input.y * speed * dt)
-  }
-
-  hunger = Math.max(0, hunger - HUNGER_DROP * dt)
-  if (hunger === 0 && Math.random() < dt * 0.3) {
-    showToast('太饿了，需要吃点东西')
   }
 
   updateFloats(dt)
@@ -690,12 +722,14 @@ function movePlayer(dx: number, dy: number): void {
 }
 
 function canStandAt(x: number, y: number): boolean {
-  const tile = tileFromWorld(x, y)
-  if (!hasRaftTile(tile)) {
-    return false
-  }
-  const center = tileCenter(tile.x, tile.y)
-  return Math.abs(x - center.x) <= TILE / 2 - PLAYER_RADIUS / 2 && Math.abs(y - center.y) <= TILE / 2 - PLAYER_RADIUS / 2
+  const samples = [
+    { x, y },
+    { x: x - PLAYER_RADIUS, y },
+    { x: x + PLAYER_RADIUS, y },
+    { x, y: y - PLAYER_RADIUS },
+    { x, y: y + PLAYER_RADIUS },
+  ]
+  return samples.every((sample) => hasRaftTile(tileFromWorld(sample.x, sample.y)))
 }
 
 function updateFloats(dt: number): void {
@@ -810,8 +844,6 @@ function draw(): void {
 }
 
 function drawOcean(): void {
-  const offsetX = ((-camera.x * 0.2) % 96) - 96
-  const offsetY = ((-camera.y * 0.2) % 96) - 96
   const gradient = ctx.createLinearGradient(0, 0, width, height)
   gradient.addColorStop(0, '#42c5d8')
   gradient.addColorStop(0.55, '#258cb9')
@@ -819,13 +851,15 @@ function drawOcean(): void {
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, width, height)
 
-  ctx.strokeStyle = 'rgba(255,255,255,0.16)'
-  ctx.lineWidth = 2
-  for (let y = offsetY; y < height + 120; y += 96) {
-    for (let x = offsetX; x < width + 120; x += 96) {
-      ctx.beginPath()
-      ctx.arc(x, y, 22, 0.2, Math.PI - 0.2)
-      ctx.stroke()
+  const tileSize = 104
+  const offsetX = ((-camera.x * 0.18) % tileSize) - tileSize
+  const offsetY = ((-camera.y * 0.18) % tileSize) - tileSize
+  for (let y = offsetY; y < height + tileSize; y += tileSize) {
+    for (let x = offsetX; x < width + tileSize; x += tileSize) {
+      const frameName = (Math.floor((x - offsetX) / tileSize) + Math.floor((y - offsetY) / tileSize)) % 2 === 0 ? 'water_tile_1' : 'water_tile_2'
+      ctx.globalAlpha = 0.38
+      drawSpriteRect(frameName, x - 1, y - 1, tileSize + 2, tileSize + 2)
+      ctx.globalAlpha = 1
     }
   }
 }
@@ -858,19 +892,7 @@ function drawRaft(): void {
 function drawFloorTile(x: number, y: number): void {
   ctx.save()
   ctx.translate(x, y)
-  ctx.fillStyle = '#b98249'
-  roundRect(-TILE / 2 + 2, -TILE / 2 + 2, TILE - 4, TILE - 4, 8)
-  ctx.fill()
-  ctx.strokeStyle = '#714629'
-  ctx.lineWidth = 2
-  for (let i = -1; i <= 1; i += 1) {
-    ctx.beginPath()
-    ctx.moveTo(-TILE / 2 + 8, i * 16)
-    ctx.lineTo(TILE / 2 - 8, i * 16 + 5)
-    ctx.stroke()
-  }
-  ctx.strokeStyle = 'rgba(255,255,255,0.2)'
-  ctx.strokeRect(-TILE / 2 + 5, -TILE / 2 + 5, TILE - 10, TILE - 10)
+  drawSpriteRect('wood_planks', -TILE / 2, -TILE / 2, TILE, TILE)
   ctx.restore()
 }
 
@@ -898,7 +920,7 @@ function drawFloats(): void {
     const screen = worldToScreen(floating)
     const name: SpriteName =
       floating.kind === 'wood'
-        ? 'logs_pile'
+        ? 'wooden_plank_single'
         : floating.kind === 'plastic'
           ? 'water_bottle'
           : floating.kind === 'leaf'
@@ -1008,6 +1030,21 @@ function togglePanel(panel: HTMLElement): void {
   panel.classList.toggle('hidden')
 }
 
+async function acceptLandscapePrompt(): Promise<void> {
+  landscapePromptSeen = true
+  window.localStorage.setItem('raft-landscape-prompt-seen', '1')
+  landscapePrompt.classList.add('hidden')
+
+  try {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen()
+    }
+    await screen.orientation?.lock?.('landscape')
+  } catch {
+    showToast('请把手机旋转到横屏')
+  }
+}
+
 function loop(now: number): void {
   const dt = Math.min(0.033, (now - lastTime) / 1000)
   lastTime = now
@@ -1049,6 +1086,9 @@ function setupEvents(): void {
   })
   document.querySelector('#interact-button')?.addEventListener('click', interact)
   document.querySelector('#eat-button')?.addEventListener('click', eatFish)
+  landscapeButton.addEventListener('click', () => {
+    void acceptLandscapePrompt()
+  })
   document.querySelectorAll<HTMLElement>('[data-close]').forEach((button) => {
     button.addEventListener('click', () => {
       inventoryPanel.classList.add('hidden')
@@ -1111,5 +1151,8 @@ function resetStick(event: PointerEvent): void {
 resize()
 setupEvents()
 renderInventory()
+if (!landscapePromptSeen && window.matchMedia('(orientation: portrait)').matches) {
+  landscapePrompt.classList.remove('hidden')
+}
 sprite.addEventListener('load', renderInventory)
 requestAnimationFrame(loop)
