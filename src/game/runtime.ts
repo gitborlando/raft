@@ -1,5 +1,4 @@
 ﻿import spriteUrl from '../assets/spirte.png'
-import { uiStore } from '../uiStore'
 import { SpriteRenderer } from './SpriteRenderer'
 import {
   FLOAT_RADIUS,
@@ -18,6 +17,7 @@ import type { Building, BuildingKind, FloatKind, Floating, Hook, Item, SpriteNam
 
 
 const canvas = queryRequired<HTMLCanvasElement>('#game')
+const gameStage = queryRequired<HTMLElement>('#game-stage')
 const hungerFill = queryRequired<HTMLElement>('#hunger-fill')
 const hungerValue = queryRequired<HTMLElement>('#hunger-value')
 const toast = queryRequired<HTMLElement>('#toast')
@@ -26,8 +26,9 @@ const inventoryPanel = queryRequired<HTMLElement>('#inventory-panel')
 const buildPanel = queryRequired<HTMLElement>('#build-panel')
 const goalText = queryRequired<HTMLElement>('#goal-text')
 const stick = queryRequired<HTMLElement>('#stick')
-const landscapePrompt = queryRequired<HTMLElement>('#landscape-prompt')
-const landscapeButton = queryRequired<HTMLButtonElement>('#landscape-button')
+const displayScaleInput = queryRequired<HTMLInputElement>('#display-scale')
+const displayScaleValue = queryRequired<HTMLElement>('#display-scale-value')
+const orientationToggle = queryRequired<HTMLButtonElement>('#orientation-toggle')
 const context = canvas.getContext('2d')
 
 if (!context) {
@@ -86,7 +87,7 @@ let lastMoveDir: Vec = { x: 0, y: 1 }
 let toastTimer = 0
 let completed = false
 let joystickPointer: number | null = null
-let landscapePromptSeen = uiStore.landscapePromptSeen
+let displayScale = Number(displayScaleInput.value) || 0.7
 
 for (let gx = -1; gx <= 1; gx += 1) {
   for (let gy = -1; gy <= 1; gy += 1) {
@@ -96,8 +97,8 @@ for (let gx = -1; gx <= 1; gx += 1) {
 
 function resize(): void {
   dpr = Math.min(window.devicePixelRatio || 1, 2)
-  width = window.innerWidth
-  height = window.innerHeight
+  width = gameStage.clientWidth
+  height = gameStage.clientHeight
   canvas.width = Math.floor(width * dpr)
   canvas.height = Math.floor(height * dpr)
   canvas.style.width = `${width}px`
@@ -107,16 +108,32 @@ function resize(): void {
 
 function worldToScreen(pos: Vec): Vec {
   return {
-    x: pos.x - camera.x + width / 2,
-    y: pos.y - camera.y + height / 2,
+    x: (pos.x - camera.x) * displayScale + width / 2,
+    y: (pos.y - camera.y) * displayScale + height / 2,
   }
 }
 
 function screenToWorld(x: number, y: number): Vec {
   return {
-    x: x + camera.x - width / 2,
-    y: y + camera.y - height / 2,
+    x: (x - width / 2) / displayScale + camera.x,
+    y: (y - height / 2) / displayScale + camera.y,
   }
+}
+
+function screenSize(value: number): number {
+  return value * displayScale
+}
+
+function setDisplayScale(value: number): void {
+  displayScale = Math.min(1, Math.max(0.35, value))
+  document.documentElement.style.setProperty('--display-scale', String(displayScale))
+  displayScaleInput.value = String(displayScale)
+  displayScaleValue.textContent = `${Math.round(displayScale * 100)}%`
+}
+
+function toggleOrientationLayout(): void {
+  document.body.classList.toggle('portrait-layout')
+  requestAnimationFrame(resize)
 }
 
 
@@ -170,15 +187,17 @@ function collectFloat(kind: FloatKind): void {
 function spawnFloat(): void {
   const kind = weightedFloat()
   const fromTop = Math.random() < 0.65
-  const margin = 160
+  const margin = 160 / displayScale
   const worldTopLeft = screenToWorld(0, 0)
   const worldBottomRight = screenToWorld(width, height)
+  const worldViewWidth = worldBottomRight.x - worldTopLeft.x
+  const worldViewHeight = worldBottomRight.y - worldTopLeft.y
   const x = fromTop
-    ? worldTopLeft.x - margin + Math.random() * (width + margin * 2)
+    ? worldTopLeft.x - margin + Math.random() * (worldViewWidth + margin * 2)
     : worldBottomRight.x + margin
   const y = fromTop
     ? worldTopLeft.y - margin
-    : worldTopLeft.y - margin + Math.random() * (height + margin * 2)
+    : worldTopLeft.y - margin + Math.random() * (worldViewHeight + margin * 2)
   const speed = 62 + Math.random() * 40
 
   floats.push({
@@ -497,7 +516,7 @@ function updateFloats(dt: number): void {
   for (let i = floats.length - 1; i >= 0; i -= 1) {
     const floating = floats[i]
     const screen = worldToScreen(floating)
-    if (floating.captured || screen.y > height + 260 || screen.x < -260) {
+    if (floating.captured || screen.y > height + screenSize(260) || screen.x < -screenSize(260)) {
       floats.splice(i, 1)
     }
   }
@@ -591,9 +610,9 @@ function drawOcean(): void {
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, width, height)
 
-  const tileSize = 104
-  const offsetX = ((-camera.x * 0.18) % tileSize) - tileSize
-  const offsetY = ((-camera.y * 0.18) % tileSize) - tileSize
+  const tileSize = screenSize(104)
+  const offsetX = ((-camera.x * 0.18 * displayScale) % tileSize) - tileSize
+  const offsetY = ((-camera.y * 0.18 * displayScale) % tileSize) - tileSize
   for (let y = offsetY; y < height + tileSize; y += tileSize) {
     for (let x = offsetX; x < width + tileSize; x += tileSize) {
       const frameName = (Math.floor((x - offsetX) / tileSize) + Math.floor((y - offsetY) / tileSize)) % 2 === 0 ? 'tile_water_1' : 'tile_water_2'
@@ -617,14 +636,14 @@ function drawRaft(): void {
     const screen = worldToScreen(tileCenter(Number(xRaw), Number(yRaw)))
     if (building.kind === 'grill') {
       const state = building.grill?.state ?? 'empty'
-      spriteRenderer.draw(state === 'empty' ? 'prop_grill_empty' : state === 'cooking' ? 'prop_grill_raw_fish' : 'prop_grill_cooked_fish', screen.x, screen.y - 5, 58)
+      spriteRenderer.draw(state === 'empty' ? 'prop_grill_empty' : state === 'cooking' ? 'prop_grill_raw_fish' : 'prop_grill_cooked_fish', screen.x, screen.y - screenSize(5), screenSize(58))
       if (state === 'cooking' && building.grill) {
-        drawProgress(screen.x - 25, screen.y + 27, 50, building.grill.timer / 8)
+        drawProgress(screen.x - screenSize(25), screen.y + screenSize(27), screenSize(50), building.grill.timer / 8)
       }
     } else if (building.kind === 'storage') {
-      spriteRenderer.draw('prop_chest_closed', screen.x, screen.y - 4, 54)
+      spriteRenderer.draw('prop_chest_closed', screen.x, screen.y - screenSize(4), screenSize(54))
     } else {
-      spriteRenderer.draw('prop_fish_net', screen.x, screen.y, 58)
+      spriteRenderer.draw('prop_fish_net', screen.x, screen.y, screenSize(58))
     }
   })
 }
@@ -632,7 +651,8 @@ function drawRaft(): void {
 function drawFloorTile(x: number, y: number): void {
   ctx.save()
   ctx.translate(x, y)
-  spriteRenderer.drawRect('tile_wood_floor', -TILE / 2, -TILE / 2, TILE, TILE)
+  const tileSize = screenSize(TILE)
+  spriteRenderer.drawRect('tile_wood_floor', -tileSize / 2, -tileSize / 2, tileSize, tileSize)
   ctx.restore()
 }
 
@@ -648,10 +668,10 @@ function roundRect(x: number, y: number, w: number, h: number, r: number): void 
 
 function drawProgress(x: number, y: number, w: number, ratio: number): void {
   ctx.fillStyle = 'rgba(20, 26, 31, 0.8)'
-  roundRect(x, y, w, 7, 4)
+  roundRect(x, y, w, screenSize(7), screenSize(4))
   ctx.fill()
   ctx.fillStyle = '#ffb347'
-  roundRect(x + 1, y + 1, (w - 2) * (1 - ratio), 5, 3)
+  roundRect(x + screenSize(1), y + screenSize(1), (w - screenSize(2)) * (1 - ratio), screenSize(5), screenSize(3))
   ctx.fill()
 }
 
@@ -666,7 +686,7 @@ function drawFloats(): void {
           : floating.kind === 'leaf'
             ? 'item_palm_leaf'
             : 'item_wood_crate'
-    spriteRenderer.draw(name, screen.x, screen.y, floating.size)
+    spriteRenderer.draw(name, screen.x, screen.y, screenSize(floating.size))
   }
 }
 
@@ -677,12 +697,12 @@ function drawHook(): void {
   const playerScreen = worldToScreen(player)
   const hookScreen = worldToScreen(hook)
   ctx.strokeStyle = '#463225'
-  ctx.lineWidth = 3
+  ctx.lineWidth = screenSize(3)
   ctx.beginPath()
   ctx.moveTo(playerScreen.x, playerScreen.y)
   ctx.lineTo(hookScreen.x, hookScreen.y)
   ctx.stroke()
-  spriteRenderer.drawRotated('tool_iron_hook', hookScreen.x, hookScreen.y, 38, Math.atan2(hook.dir.y, hook.dir.x) + Math.PI / 2)
+  spriteRenderer.drawRotated('tool_iron_hook', hookScreen.x, hookScreen.y, screenSize(38), Math.atan2(hook.dir.y, hook.dir.x) + Math.PI / 2)
 }
 
 function drawPlayer(): void {
@@ -708,9 +728,9 @@ function drawPlayer(): void {
 
   ctx.fillStyle = 'rgba(0, 0, 0, 0.18)'
   ctx.beginPath()
-  ctx.ellipse(screen.x, screen.y + 23, 18, 8, 0, 0, Math.PI * 2)
+  ctx.ellipse(screen.x, screen.y + screenSize(23), screenSize(18), screenSize(8), 0, 0, Math.PI * 2)
   ctx.fill()
-  spriteRenderer.draw(spriteName, screen.x, screen.y - 10, 74, flipPlayer)
+  spriteRenderer.draw(spriteName, screen.x, screen.y - screenSize(10), screenSize(74), flipPlayer)
 }
 
 function renderInventory(): void {
@@ -776,21 +796,6 @@ function togglePanel(panel: HTMLElement): void {
   panel.classList.toggle('hidden')
 }
 
-async function acceptLandscapePrompt(): Promise<void> {
-  uiStore.markLandscapePromptSeen()
-  landscapePromptSeen = true
-  landscapePrompt.classList.add('hidden')
-
-  try {
-    if (!document.fullscreenElement) {
-      await document.documentElement.requestFullscreen()
-    }
-    await screen.orientation?.lock?.('landscape')
-  } catch {
-    showToast('请把手机旋转到横屏')
-  }
-}
-
 function loop(now: number): void {
   const dt = Math.min(0.033, (now - lastTime) / 1000)
   lastTime = now
@@ -819,7 +824,7 @@ function setupEvents(): void {
     if (!(target instanceof HTMLCanvasElement)) {
       return
     }
-    const world = screenToWorld(event.clientX, event.clientY)
+    const world = screenToWorld(event.offsetX, event.offsetY)
     pointerAim.x = world.x - player.x
     pointerAim.y = world.y - player.y
     throwHook(world)
@@ -832,8 +837,9 @@ function setupEvents(): void {
   })
   document.querySelector('#interact-button')?.addEventListener('click', interact)
   document.querySelector('#eat-button')?.addEventListener('click', eatFish)
-  landscapeButton.addEventListener('click', () => {
-    void acceptLandscapePrompt()
+  orientationToggle.addEventListener('click', toggleOrientationLayout)
+  displayScaleInput.addEventListener('input', () => {
+    setDisplayScale(Number(displayScaleInput.value))
   })
   document.querySelectorAll<HTMLElement>('[data-close]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -867,10 +873,9 @@ function setupEvents(): void {
 }
 
 function updateStick(event: PointerEvent): void {
-  const rect = stick.getBoundingClientRect()
-  const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
-  const raw = { x: event.clientX - center.x, y: event.clientY - center.y }
-  const max = rect.width * 0.34
+  const center = { x: stick.clientWidth / 2, y: stick.clientHeight / 2 }
+  const raw = { x: event.offsetX - center.x, y: event.offsetY - center.y }
+  const max = stick.clientWidth * 0.34
   const length = Math.min(max, Math.hypot(raw.x, raw.y))
   const dir = normalize(raw)
   moveInput.x = dir.x * (length / max)
@@ -894,12 +899,10 @@ function resetStick(event: PointerEvent): void {
   }
 }
 
+setDisplayScale(displayScale)
 resize()
 setupEvents()
 renderInventory()
-if (!landscapePromptSeen && window.matchMedia('(orientation: portrait)').matches) {
-  landscapePrompt.classList.remove('hidden')
-}
 sprite.addEventListener('load', renderInventory)
 requestAnimationFrame(loop)
 

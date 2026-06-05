@@ -8,6 +8,7 @@ type AppProps = {
 
 const shell = css`
   :global(:root) {
+    --display-scale: 0.7;
     font-family:
       Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
       sans-serif;
@@ -48,11 +49,89 @@ const shell = css`
   }
 
   :global(#game) {
-    position: fixed;
+    position: absolute;
     inset: 0;
     display: block;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
+  }
+
+  :global(.game-stage) {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: #0f6e92;
+  }
+
+  :global(.ui-layer) {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: calc(100% / var(--display-scale));
+    height: calc(100% / var(--display-scale));
+    pointer-events: none;
+    transform: scale(var(--display-scale));
+    transform-origin: top left;
+  }
+
+  @media (orientation: portrait) {
+    :global(body:not(.portrait-layout) .game-stage) {
+      top: 50%;
+      left: 50%;
+      width: 100vh;
+      height: 100vw;
+      transform: translate(-50%, -50%) rotate(90deg);
+      transform-origin: center;
+    }
+  }
+
+  :global(.scale-control) {
+    position: fixed;
+    top: max(12px, env(safe-area-inset-top));
+    right: 66px;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: auto 118px 34px;
+    gap: 8px;
+    align-items: center;
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 2px solid rgba(30, 43, 48, 0.22);
+    border-radius: 8px;
+    background: rgba(255, 248, 224, 0.92);
+    box-shadow: 0 6px 16px rgba(20, 46, 55, 0.18);
+    color: #20303a;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  :global(.scale-control input) {
+    width: 118px;
+    accent-color: #ff9f2f;
+  }
+
+  :global(.orientation-toggle) {
+    position: fixed;
+    top: calc(max(12px, env(safe-area-inset-top)) + 60px);
+    right: 12px;
+    z-index: 30;
+    min-height: 38px;
+    padding: 0 12px;
+    border: 2px solid rgba(30, 43, 48, 0.22);
+    border-radius: 8px;
+    background: rgba(255, 248, 224, 0.92);
+    box-shadow: 0 6px 16px rgba(20, 46, 55, 0.18);
+    color: #20303a;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  :global(body.portrait-layout .orientation-toggle .portrait-label) {
+    display: none;
+  }
+
+  :global(body:not(.portrait-layout) .orientation-toggle .landscape-label) {
+    display: none;
   }
 
   :global(.top-hud) {
@@ -130,55 +209,6 @@ const shell = css`
   :global(.toast.visible) {
     opacity: 1;
     transform: translate(-50%, 0);
-  }
-
-  :global(.landscape-prompt) {
-    position: fixed;
-    inset: 0;
-    z-index: 20;
-    display: grid;
-    place-items: center;
-    padding: 22px;
-    background: rgba(8, 40, 52, 0.72);
-  }
-
-  :global(.landscape-prompt.hidden) {
-    display: none;
-  }
-
-  :global(.landscape-prompt > div) {
-    width: min(340px, 100%);
-    padding: 18px;
-    border: 2px solid rgba(70, 45, 25, 0.28);
-    border-radius: 8px;
-    background: #fff4cf;
-    box-shadow: 0 18px 40px rgba(5, 26, 34, 0.32);
-    text-align: center;
-  }
-
-  :global(.landscape-prompt strong) {
-    display: block;
-    color: #20303a;
-    font-size: 22px;
-    line-height: 1.2;
-  }
-
-  :global(.landscape-prompt p) {
-    margin: 8px 0 16px;
-    color: #5c4935;
-    font-size: 14px;
-    font-weight: 700;
-    line-height: 1.45;
-  }
-
-  :global(.landscape-prompt button) {
-    width: 100%;
-    min-height: 48px;
-    border-radius: 8px;
-    background: #ffbe56;
-    box-shadow: inset 0 -3px rgba(116, 76, 36, 0.24);
-    color: #352514;
-    font-weight: 900;
   }
 
   :global(.goal-panel) {
@@ -335,6 +365,7 @@ const shell = css`
     border-radius: 50%;
     background: rgba(255, 248, 224, 0.9);
     box-shadow: 0 6px 14px rgba(9, 40, 50, 0.26);
+    pointer-events: none;
   }
 
   :global(.action-cluster) {
@@ -377,98 +408,102 @@ const shell = css`
 `
 
 export const App = observer(function App({ store }: AppProps) {
-  const landscapeClassName = store.landscapePromptSeen ? 'landscape-prompt hidden' : 'landscape-prompt hidden'
+  void store
 
   return (
     <div className={shell}>
-      <canvas id="game" aria-label="Raft mobile MVP" />
-      <div className="top-hud">
-        <div className="hunger">
-          <span>饥饿</span>
-          <div className="bar">
-            <i id="hunger-fill" />
-          </div>
-          <strong id="hunger-value">100</strong>
+      <div id="game-stage" className="game-stage">
+        <div className="scale-control">
+          <span>缩放</span>
+          <input id="display-scale" type="range" min="0.35" max="1" step="0.05" defaultValue="0.7" />
+          <strong id="display-scale-value">70%</strong>
         </div>
-        <button id="bag-toggle" className="icon-button" type="button" aria-label="打开背包">
-          包
+        <button id="orientation-toggle" className="orientation-toggle" type="button">
+          <span className="portrait-label">竖屏</span>
+          <span className="landscape-label">横屏</span>
         </button>
-      </div>
-      <div id="toast" className="toast" />
-      <section id="landscape-prompt" className={landscapeClassName}>
-        <div>
-          <strong>建议横屏游玩</strong>
-          <p>横屏视野更大，投钩和建造更方便。</p>
-          <button id="landscape-button" type="button">
-            横屏开始
-          </button>
-        </div>
-      </section>
-      <section id="goal-panel" className="goal-panel">
-        <strong>V0.5 目标</strong>
-        <span id="goal-text" />
-      </section>
-      <section id="inventory-panel" className="panel inventory-panel hidden">
-        <header>
-          <strong>背包</strong>
-          <button className="close-panel" data-close="inventory" type="button">
-            关闭
-          </button>
-        </header>
-        <div id="inventory-grid" className="inventory-grid" />
-      </section>
-      <section id="build-panel" className="panel build-panel hidden">
-        <header>
-          <strong>建造 / 合成</strong>
-          <button className="close-panel" data-close="build" type="button">
-            关闭
-          </button>
-        </header>
-        <div className="build-actions">
-          <button data-craft="rope" type="button">
-            合成绳子
-            <br />
-            <small>树叶 x2</small>
-          </button>
-          <button data-craft="floor" type="button">
-            扩建地板
-            <br />
-            <small>木板 x2</small>
-          </button>
-          <button data-craft="grill" type="button">
-            烤架
-            <br />
-            <small>木板 x4 塑料 x2 绳子 x1</small>
-          </button>
-          <button data-craft="storage" type="button">
-            储物箱
-            <br />
-            <small>木板 x6 塑料 x2</small>
-          </button>
-          <button data-craft="net" type="button">
-            收集网
-            <br />
-            <small>木板 x3 塑料 x2 绳子 x2</small>
-          </button>
-        </div>
-      </section>
-      <div className="bottom-controls">
-        <div id="stick" className="stick">
-          <i />
-        </div>
-        <div className="action-cluster">
-          <button id="hook-button" className="action primary" type="button">
-            投钩
-          </button>
-          <button id="interact-button" className="action" type="button">
-            互动
-          </button>
-          <button id="eat-button" className="action" type="button">
-            吃鱼
-          </button>
-          <button id="build-toggle" className="action" type="button">
-            建造
-          </button>
+        <canvas id="game" aria-label="Raft mobile MVP" />
+        <div className="ui-layer">
+          <div className="top-hud">
+            <div className="hunger">
+              <span>饥饿</span>
+              <div className="bar">
+                <i id="hunger-fill" />
+              </div>
+              <strong id="hunger-value">100</strong>
+            </div>
+            <button id="bag-toggle" className="icon-button" type="button" aria-label="打开背包">
+              包
+            </button>
+          </div>
+          <div id="toast" className="toast" />
+          <section id="goal-panel" className="goal-panel">
+            <strong>V0.5 目标</strong>
+            <span id="goal-text" />
+          </section>
+          <section id="inventory-panel" className="panel inventory-panel hidden">
+            <header>
+              <strong>背包</strong>
+              <button className="close-panel" data-close="inventory" type="button">
+                关闭
+              </button>
+            </header>
+            <div id="inventory-grid" className="inventory-grid" />
+          </section>
+          <section id="build-panel" className="panel build-panel hidden">
+            <header>
+              <strong>建造 / 合成</strong>
+              <button className="close-panel" data-close="build" type="button">
+                关闭
+              </button>
+            </header>
+            <div className="build-actions">
+              <button data-craft="rope" type="button">
+                合成绳子
+                <br />
+                <small>树叶 x2</small>
+              </button>
+              <button data-craft="floor" type="button">
+                扩建地板
+                <br />
+                <small>木板 x2</small>
+              </button>
+              <button data-craft="grill" type="button">
+                烤架
+                <br />
+                <small>木板 x4 塑料 x2 绳子 x1</small>
+              </button>
+              <button data-craft="storage" type="button">
+                储物箱
+                <br />
+                <small>木板 x6 塑料 x2</small>
+              </button>
+              <button data-craft="net" type="button">
+                收集网
+                <br />
+                <small>木板 x3 塑料 x2 绳子 x2</small>
+              </button>
+            </div>
+          </section>
+          <div className="bottom-controls">
+            <div id="stick" className="stick">
+              <i />
+            </div>
+            <div className="action-cluster">
+              <button id="hook-button" className="action primary" type="button">
+                投钩
+              </button>
+              <button id="interact-button" className="action" type="button">
+                互动
+              </button>
+              <button id="eat-button" className="action" type="button">
+                吃鱼
+              </button>
+              <button id="build-toggle" className="action" type="button">
+                建造
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
