@@ -43,6 +43,7 @@ const ctx: CanvasRenderingContext2D = context
 const sprite = new Image()
 sprite.src = spriteUrl
 const spriteRenderer = new SpriteRenderer(ctx, sprite)
+const RAFT_DRIFT: Vec = { x: 0, y: -28 }
 
 const inventory: Record<Item, number> = {
   wood: 999,
@@ -58,6 +59,7 @@ const buildings = new Map<string, Building>()
 const floats: Floating[] = []
 const keys = new Set<string>()
 const camera: Vec = { x: 0, y: 0 }
+const driftOffset: Vec = { x: 0, y: 0 }
 const skipFullscreenPrompt = /SM-/i.test(navigator.userAgent)
 const pointerAim: Vec = { x: 1, y: 0 }
 const moveInput: Vec = { x: 0, y: 0 }
@@ -120,13 +122,27 @@ function worldToScreen(pos: Vec): Vec {
 
 function screenToWorld(x: number, y: number): Vec {
   return {
-    x: (x - width / 2) / displayScale + camera.x,
-    y: (y - height / 2) / displayScale + camera.y,
+    x: (x - width / 2) / displayScale + camera.x + driftOffset.x,
+    y: (y - height / 2) / displayScale + camera.y + driftOffset.y,
   }
 }
 
 function screenSize(value: number): number {
   return value * displayScale
+}
+
+function raftToSea(pos: Vec): Vec {
+  return {
+    x: pos.x + driftOffset.x,
+    y: pos.y + driftOffset.y,
+  }
+}
+
+function seaToScreen(pos: Vec): Vec {
+  return {
+    x: (pos.x - driftOffset.x - camera.x) * displayScale + width / 2,
+    y: (pos.y - driftOffset.y - camera.y) * displayScale + height / 2,
+  }
 }
 
 function setDisplayScale(value: number): void {
@@ -227,15 +243,14 @@ function spawnFloat(): void {
   const y = fromTop
     ? worldTopLeft.y - margin
     : worldTopLeft.y - margin + Math.random() * (worldViewHeight + margin * 2)
-  const speed = 62 + Math.random() * 40
 
   floats.push({
     id: nextFloatId,
     kind,
     x,
     y,
-    vx: -speed * 0.35,
-    vy: speed,
+    vx: 0,
+    vy: 0,
     size: kind === 'crate' ? 58 : 46,
     captured: false,
   })
@@ -254,15 +269,16 @@ function throwHook(target: Vec): void {
   if (hook.state !== 'idle') {
     return
   }
-  const dir = normalize({ x: target.x - player.x, y: target.y - player.y })
+  const playerSea = raftToSea(player)
+  const dir = normalize({ x: target.x - playerSea.x, y: target.y - playerSea.y })
   hook.state = 'flying'
-  hook.x = player.x
-  hook.y = player.y
-  hook.prevX = player.x
-  hook.prevY = player.y
+  hook.x = playerSea.x
+  hook.y = playerSea.y
+  hook.prevX = playerSea.x
+  hook.prevY = playerSea.y
   hook.dir = dir
-  hook.maxX = player.x + dir.x * HOOK_MAX
-  hook.maxY = player.y + dir.y * HOOK_MAX
+  hook.maxX = playerSea.x + dir.x * HOOK_MAX
+  hook.maxY = playerSea.y + dir.y * HOOK_MAX
   hook.attachedId = null
   pointerAim.x = dir.x
   pointerAim.y = dir.y
@@ -454,6 +470,9 @@ function eatFish(): void {
 }
 
 function update(dt: number): void {
+  driftOffset.x += RAFT_DRIFT.x * dt
+  driftOffset.y += RAFT_DRIFT.y * dt
+
   const keyboardInput = getKeyboardInput()
   const input = normalizeInput({
     x: keyboardInput.x + moveInput.x,
@@ -519,19 +538,12 @@ function updateFloats(dt: number): void {
     spawnTimer = 1.05 + Math.random() * 0.75
   }
 
-  for (const floating of floats) {
-    if (!floating.captured) {
-      floating.x += floating.vx * dt
-      floating.y += floating.vy * dt
-    }
-  }
-
   buildings.forEach((building, key) => {
     if (building.kind !== 'net') {
       return
     }
     const [xRaw, yRaw] = key.split(',')
-    const center = tileCenter(Number(xRaw), Number(yRaw))
+    const center = raftToSea(tileCenter(Number(xRaw), Number(yRaw)))
     for (const floating of floats) {
       if (!floating.captured && dist(floating, center) < TILE * 0.72) {
         floating.captured = true
@@ -542,19 +554,22 @@ function updateFloats(dt: number): void {
 
   for (let i = floats.length - 1; i >= 0; i -= 1) {
     const floating = floats[i]
-    const screen = worldToScreen(floating)
-    if (floating.captured || screen.y > height + screenSize(260) || screen.x < -screenSize(260)) {
+    const screen = seaToScreen(floating)
+    const collectedByHook = hook.attachedId === floating.id
+    if ((!collectedByHook && floating.captured) || screen.y > height + screenSize(260) || screen.x < -screenSize(260)) {
       floats.splice(i, 1)
     }
   }
 }
 
 function updateHook(dt: number): void {
+  const playerSea = raftToSea(player)
+
   if (hook.state === 'idle') {
-    hook.x = player.x
-    hook.y = player.y
-    hook.prevX = player.x
-    hook.prevY = player.y
+    hook.x = playerSea.x
+    hook.y = playerSea.y
+    hook.prevX = playerSea.x
+    hook.prevY = playerSea.y
     return
   }
 
@@ -571,13 +586,13 @@ function updateHook(dt: number): void {
         break
       }
     }
-    if (dist(hook, player) >= HOOK_MAX || dist(hook, { x: hook.maxX, y: hook.maxY }) < 10) {
+    if (dist(hook, playerSea) >= HOOK_MAX || dist(hook, { x: hook.maxX, y: hook.maxY }) < 10) {
       hook.state = 'returning'
     }
   } else {
     hook.prevX = hook.x
     hook.prevY = hook.y
-    const toPlayer = normalize({ x: player.x - hook.x, y: player.y - hook.y })
+    const toPlayer = normalize({ x: playerSea.x - hook.x, y: playerSea.y - hook.y })
     hook.x += toPlayer.x * HOOK_BACK_SPEED * dt
     hook.y += toPlayer.y * HOOK_BACK_SPEED * dt
     const attached = floats.find((floating) => floating.id === hook.attachedId)
@@ -585,7 +600,7 @@ function updateHook(dt: number): void {
       attached.x = hook.x
       attached.y = hook.y
     }
-    if (dist(hook, player) < 18) {
+    if (dist(hook, playerSea) < 18) {
       if (attached) {
         collectFloat(attached.kind)
         floats.splice(floats.indexOf(attached), 1)
@@ -638,8 +653,10 @@ function drawOcean(): void {
   ctx.fillRect(0, 0, width, height)
 
   const tileSize = screenSize(104)
-  const offsetX = ((-camera.x * 0.18 * displayScale) % tileSize) - tileSize
-  const offsetY = ((-camera.y * 0.18 * displayScale) % tileSize) - tileSize
+  const seaX = camera.x + driftOffset.x
+  const seaY = camera.y + driftOffset.y
+  const offsetX = ((-seaX * displayScale) % tileSize) - tileSize
+  const offsetY = ((-seaY * displayScale) % tileSize) - tileSize
   for (let y = offsetY; y < height + tileSize; y += tileSize) {
     for (let x = offsetX; x < width + tileSize; x += tileSize) {
       const frameName = (Math.floor((x - offsetX) / tileSize) + Math.floor((y - offsetY) / tileSize)) % 2 === 0 ? 'tile_water_1' : 'tile_water_2'
@@ -704,7 +721,7 @@ function drawProgress(x: number, y: number, w: number, ratio: number): void {
 
 function drawFloats(): void {
   for (const floating of floats) {
-    const screen = worldToScreen(floating)
+    const screen = seaToScreen(floating)
     const name: SpriteName =
       floating.kind === 'wood'
         ? 'item_single_plank'
@@ -722,7 +739,7 @@ function drawHook(): void {
     return
   }
   const playerScreen = worldToScreen(player)
-  const hookScreen = worldToScreen(hook)
+  const hookScreen = seaToScreen(hook)
   ctx.strokeStyle = '#463225'
   ctx.lineWidth = screenSize(3)
   ctx.beginPath()
@@ -847,7 +864,10 @@ function setupEvents(): void {
       togglePanel(inventoryPanel)
     }
     if (event.code === 'KeyE') interact()
-    if (event.code === 'Space') throwHook({ x: player.x + pointerAim.x * HOOK_MAX, y: player.y + pointerAim.y * HOOK_MAX })
+    if (event.code === 'Space') {
+      const playerSea = raftToSea(player)
+      throwHook({ x: playerSea.x + pointerAim.x * HOOK_MAX, y: playerSea.y + pointerAim.y * HOOK_MAX })
+    }
   })
   window.addEventListener('keyup', (event) => keys.delete(event.code))
 
@@ -857,15 +877,17 @@ function setupEvents(): void {
       return
     }
     const world = screenToWorld(event.offsetX, event.offsetY)
-    pointerAim.x = world.x - player.x
-    pointerAim.y = world.y - player.y
+    const playerSea = raftToSea(player)
+    pointerAim.x = world.x - playerSea.x
+    pointerAim.y = world.y - playerSea.y
     throwHook(world)
   })
 
   document.querySelector('#bag-toggle')?.addEventListener('click', () => togglePanel(inventoryPanel))
   document.querySelector('#build-toggle')?.addEventListener('click', () => togglePanel(buildPanel))
   document.querySelector('#hook-button')?.addEventListener('click', () => {
-    throwHook({ x: player.x + pointerAim.x * HOOK_MAX, y: player.y + pointerAim.y * HOOK_MAX })
+    const playerSea = raftToSea(player)
+    throwHook({ x: playerSea.x + pointerAim.x * HOOK_MAX, y: playerSea.y + pointerAim.y * HOOK_MAX })
   })
   document.querySelector('#interact-button')?.addEventListener('click', interact)
   document.querySelector('#eat-button')?.addEventListener('click', eatFish)
