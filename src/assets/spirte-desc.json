@@ -3,8 +3,8 @@
     "id": 1,
     "name": "chara_front_idle",
     "category": "character",
-    "desc": "角色正面站立，身穿短袖短裤，背着背包",
-    "when": "角色处于正面静止闲置状态时使用",
+    "desc": "角色正面站立，双手自然下垂，背包斜挎在身上",
+    "when": "角色面向镜头静止时使用",
     "bound": {
       "x": 0.043575,
       "y": 0.018933,
@@ -22,28 +22,28 @@
       "x": 0.189808,
       "y": 0.018933,
       "w": 0.080502,
-      "h": 0.141997
+      "h": 0.141136
     }
   },
   {
     "id": 3,
-    "name": "chara_side_idle_right",
+    "name": "chara_left_idle",
     "category": "character",
-    "desc": "角色右侧面站立",
-    "when": "角色向右看或静止时使用",
+    "desc": "角色左侧站立，侧脸朝左，背包在身体一侧",
+    "when": "角色朝左静止或待机时使用",
     "bound": {
       "x": 0.337518,
       "y": 0.019793,
       "w": 0.080502,
-      "h": 0.141997
+      "h": 0.141136
     }
   },
   {
     "id": 4,
-    "name": "chara_side_idle_left",
+    "name": "chara_right_idle",
     "category": "character",
-    "desc": "角色左侧面站立",
-    "when": "角色向左看或静止时使用",
+    "desc": "角色右侧站立，侧脸朝右，背包在身体一侧",
+    "when": "角色朝右静止或待机时使用",
     "bound": {
       "x": 0.467504,
       "y": 0.018072,
@@ -55,8 +55,8 @@
     "id": 5,
     "name": "chara_front_walk",
     "category": "character",
-    "desc": "角色正面迈步走姿",
-    "when": "角色向下移动时使用",
+    "desc": "角色正面行走，单脚抬起形成走路姿态",
+    "when": "角色向下或朝镜头方向移动时使用",
     "bound": {
       "x": 0.607829,
       "y": 0.019793,
@@ -68,8 +68,8 @@
     "id": 6,
     "name": "chara_back_walk",
     "category": "character",
-    "desc": "角色背面迈步走姿",
-    "when": "角色向上移动时使用",
+    "desc": "角色背面行走，可看到背包和抬起的脚步",
+    "when": "角色向上或背对镜头移动时使用",
     "bound": {
       "x": 0.745199,
       "y": 0.018933,
@@ -79,10 +79,10 @@
   },
   {
     "id": 7,
-    "name": "chara_side_walk",
+    "name": "chara_right_run",
     "category": "character",
-    "desc": "角色侧面走姿",
-    "when": "角色左右方向移动时使用",
+    "desc": "角色朝右奔跑，双腿前后摆动",
+    "when": "角色向右快速移动或行走动画帧时使用",
     "bound": {
       "x": 0.881832,
       "y": 0.018933,
@@ -92,10 +92,10 @@
   },
   {
     "id": 8,
-    "name": "chara_side_run",
+    "name": "chara_left_run",
     "category": "character",
-    "desc": "角色侧面向前奔跑姿势",
-    "when": "角色侧向快速移动时使用",
+    "desc": "角色朝左奔跑，双腿前后摆动",
+    "when": "角色向左快速移动或行走动画帧时使用",
     "bound": {
       "x": 0.033973,
       "y": 0.195353,
@@ -105,10 +105,10 @@
   },
   {
     "id": 9,
-    "name": "chara_punch_front",
+    "name": "chara_reach_side",
     "category": "character",
-    "desc": "角色正面挥拳攻击姿势",
-    "when": "角色面向前进行近战攻击时使用",
+    "desc": "角色侧身伸出手臂，做出拾取或交互动作",
+    "when": "角色拾取漂浮物、点击交互或伸手收集资源时使用",
     "bound": {
       "x": 0.17873,
       "y": 0.193632,
@@ -118,10 +118,10 @@
   },
   {
     "id": 10,
-    "name": "chara_punch_side",
+    "name": "chara_hold_side",
     "category": "character",
-    "desc": "角色侧面挥拳攻击姿势",
-    "when": "角色向侧面进行近战攻击时使用",
+    "desc": "角色侧身双手前伸，像是在抓取、推动或使用物品",
+    "when": "角色进行持续交互、搬运、修建或使用工具时使用",
     "bound": {
       "x": 0.320532,
       "y": 0.194492,
@@ -131,10 +131,10 @@
   },
   {
     "id": 11,
-    "name": "tile_wood_floor",
-    "category": "environment",
-    "desc": "无边框的木质地板铺设贴图",
-    "when": "作为大面积拼接的木船地板或营地平台时使用",
+    "name": "raft_floor_tile",
+    "category": "raft",
+    "desc": "普通木筏地板，由多块木板拼成的方形地块",
+    "when": "作为木筏基础地板或可扩建平台时使用",
     "bound": {
       "x": 0.452733,
       "y": 0.198795,
@@ -144,10 +144,10 @@
   },
   {
     "id": 12,
-    "name": "tile_wood_edge",
-    "category": "environment",
-    "desc": "带有绑绳和边框的木质地板贴图",
-    "when": "作为木筏或平台的边缘部分时使用",
+    "name": "raft_frame_tile",
+    "category": "raft",
+    "desc": "加固木筏地板，四角有绳结和边框装饰",
+    "when": "作为更明显的木筏边缘、特殊地板或加固平台时使用",
     "bound": {
       "x": 0.590103,
       "y": 0.198795,
@@ -157,49 +157,49 @@
   },
   {
     "id": 13,
-    "name": "tile_water_1",
+    "name": "sea_tile_a",
     "category": "environment",
-    "desc": "深蓝色的水面波动纹理图块1",
-    "when": "大面积海洋水体拼接时使用",
+    "desc": "蓝色海面地块，带有多段浅色浪花纹理",
+    "when": "铺设普通海面背景时使用，可与其他海面地块混合",
     "bound": {
-      "x": 0.728951,
-      "y": 0.199656,
-      "w": 0.110783,
-      "h": 0.134251
+      "x": 0.731167,
+      "y": 0.203098,
+      "w": 0.106352,
+      "h": 0.128227
     }
   },
   {
     "id": 14,
-    "name": "tile_water_2",
+    "name": "sea_tile_b",
     "category": "environment",
-    "desc": "深蓝色的水面波动纹理图块2",
-    "when": "大面积海洋水体拼接时交替使用以丰富视觉效果",
+    "desc": "蓝色海面地块，浪花分布较疏，边缘平整便于拼接",
+    "when": "铺设重复海面背景时使用，用来减少纹理重复感",
     "bound": {
-      "x": 0.862629,
-      "y": 0.199656,
-      "w": 0.110044,
-      "h": 0.134251
+      "x": 0.864845,
+      "y": 0.203098,
+      "w": 0.105613,
+      "h": 0.128227
     }
   },
   {
     "id": 15,
-    "name": "tile_water_wave",
+    "name": "sea_wave_hazard",
     "category": "environment",
-    "desc": "带有白色浪花的水波纹理图块",
-    "when": "表现水流、海浪或者船只划过时的水效时使用",
+    "desc": "海面危险波纹，中央有深色水花和涌动效果",
+    "when": "表现海面异常、危险区域或事件提示时使用",
     "bound": {
-      "x": 0.024372,
-      "y": 0.370912,
-      "w": 0.110783,
-      "h": 0.124785
+      "x": 0.025849,
+      "y": 0.372633,
+      "w": 0.10709,
+      "h": 0.120482
     }
   },
   {
     "id": 16,
-    "name": "item_wood_bundle",
+    "name": "resource_driftwood_bundle",
     "category": "resource",
-    "desc": "一捆绑好的木柴",
-    "when": "玩家收集并获得基础木柴资源时使用",
+    "desc": "漂浮木材捆，由几根木头叠放组成",
+    "when": "作为海面漂浮资源或木材收集物时使用",
     "bound": {
       "x": 0.177253,
       "y": 0.385542,
@@ -209,10 +209,10 @@
   },
   {
     "id": 17,
-    "name": "item_water_bottle",
-    "category": "item",
-    "desc": "一个透明塑料纯净水瓶",
-    "when": "玩家收集淡水、补充口渴度或在背包中显示时使用",
+    "name": "resource_plastic_bottle",
+    "category": "resource",
+    "desc": "半透明塑料瓶，瓶口为蓝色瓶盖",
+    "when": "作为可拾取的塑料资源或漂浮垃圾时使用",
     "bound": {
       "x": 0.311669,
       "y": 0.375215,
@@ -222,10 +222,10 @@
   },
   {
     "id": 18,
-    "name": "item_palm_leaf",
+    "name": "resource_palm_leaf_big",
     "category": "resource",
-    "desc": "一片巨大的绿色棕榈树叶",
-    "when": "玩家采集到叶子，用于制作绳索或遮阳蓬时使用",
+    "desc": "大型绿色棕榈叶，叶片宽大且带有叶脉",
+    "when": "作为可拾取叶子资源或基础材料时使用",
     "bound": {
       "x": 0.463811,
       "y": 0.376936,
@@ -235,23 +235,23 @@
   },
   {
     "id": 19,
-    "name": "item_wood_crate",
-    "category": "container",
-    "desc": "一个结实的木质板条箱",
-    "when": "在海面上漂浮作为补给箱，或作为场景障碍物时使用",
+    "name": "loot_crate_closed",
+    "category": "item",
+    "desc": "关闭的木质资源箱，带有斜向木板加固",
+    "when": "作为海面漂流箱、掉落箱或未开启奖励箱时使用",
     "bound": {
-      "x": 0.595273,
+      "x": 0.596012,
       "y": 0.366609,
-      "w": 0.084195,
+      "w": 0.083456,
       "h": 0.114458
     }
   },
   {
     "id": 20,
-    "name": "prop_grill_empty",
-    "category": "building",
-    "desc": "石块砌成的野外烧烤架，上面有空铁网",
-    "when": "玩家建造好烹饪设施，处于闲置状态时使用",
+    "name": "grill_empty",
+    "category": "cooking",
+    "desc": "空的烤架，石头底座、木桩支架和金属烤网组成",
+    "when": "烧烤架未放置食物或待机状态时使用",
     "bound": {
       "x": 0.722304,
       "y": 0.370912,
@@ -261,10 +261,10 @@
   },
   {
     "id": 21,
-    "name": "prop_grill_raw_fish",
-    "category": "building",
-    "desc": "烧烤架上正在烤一条生的红色鱼",
-    "when": "玩家开始烤鱼，处于烹饪过程中使用",
+    "name": "grill_fish_pink",
+    "category": "cooking",
+    "desc": "烤架上放着粉色鱼，鱼身带有叉眼标记",
+    "when": "鱼刚放上烤架、正在烹饪或未烤熟阶段时使用",
     "bound": {
       "x": 0.862629,
       "y": 0.370912,
@@ -274,10 +274,10 @@
   },
   {
     "id": 22,
-    "name": "prop_grill_cooked_fish",
-    "category": "building",
-    "desc": "烧烤架上烤熟的黄色鱼，下面有火苗",
-    "when": "食物烤熟，提示玩家可以拾取时使用",
+    "name": "grill_fish_cooked",
+    "category": "cooking",
+    "desc": "烤架上放着橙色烤鱼，底部有火焰效果",
+    "when": "鱼正在烤制、已经熟成或可收取食物时使用",
     "bound": {
       "x": 0.019202,
       "y": 0.532702,
@@ -287,10 +287,10 @@
   },
   {
     "id": 23,
-    "name": "prop_chest_closed",
-    "category": "container",
-    "desc": "一个闭合的木质藏宝箱",
-    "when": "场景中放置未开启的宝箱时使用",
+    "name": "chest_closed",
+    "category": "storage",
+    "desc": "关闭的木箱，正面带有金属锁扣",
+    "when": "储物箱关闭、未打开或普通箱子状态时使用",
     "bound": {
       "x": 0.17356,
       "y": 0.54389,
@@ -300,10 +300,10 @@
   },
   {
     "id": 24,
-    "name": "prop_chest_open",
-    "category": "container",
-    "desc": "一个盖子打开的空木箱",
-    "when": "宝箱被玩家成功开启后使用",
+    "name": "chest_open",
+    "category": "storage",
+    "desc": "打开的木箱，可看到内部空槽和上翻的箱盖",
+    "when": "玩家打开储物箱、查看库存或领取物品时使用",
     "bound": {
       "x": 0.316839,
       "y": 0.530981,
@@ -313,23 +313,23 @@
   },
   {
     "id": 25,
-    "name": "prop_fish_net",
-    "category": "building",
-    "desc": "固定在水面上的方形渔网捕鱼陷阱",
-    "when": "玩家在海中布置的自动捕鱼装置工作时使用",
+    "name": "raft_collect_net",
+    "category": "raft",
+    "desc": "木筏收集网，四角木桩固定，中间是蓝色网格",
+    "when": "自动捕捉海面漂浮资源或作为木筏功能建筑时使用",
     "bound": {
       "x": 0.450517,
       "y": 0.536145,
       "w": 0.114476,
-      "h": 0.124785
+      "h": 0.123924
     }
   },
   {
     "id": 26,
-    "name": "item_single_plank",
+    "name": "resource_wood_plank",
     "category": "resource",
-    "desc": "一块平整的木板",
-    "when": "作为建筑材料、修理筏子的合成原料时显示在背包中",
+    "desc": "单块木板，呈斜放视角，表面有木纹",
+    "when": "作为基础木板资源、建造材料或物品图标时使用",
     "bound": {
       "x": 0.601182,
       "y": 0.543029,
@@ -339,10 +339,10 @@
   },
   {
     "id": 27,
-    "name": "item_plastic_waste",
+    "name": "resource_plastic_scrap",
     "category": "resource",
-    "desc": "一团揉皱的塑料垃圾碎片",
-    "when": "玩家捞起海洋废弃塑料，用于合成工业制品时使用",
+    "desc": "白蓝色塑料碎片，旁边带有小块碎料",
+    "when": "作为塑料废料、可回收材料或漂浮资源时使用",
     "bound": {
       "x": 0.731905,
       "y": 0.540448,
@@ -352,10 +352,10 @@
   },
   {
     "id": 28,
-    "name": "item_small_leaf",
+    "name": "resource_leaf_small",
     "category": "resource",
-    "desc": "一片小绿叶",
-    "when": "基础植物纤维或叶子资源图标",
+    "desc": "小型绿色叶片，形状简洁且带有清晰叶脉",
+    "when": "作为叶子材料、采集物或背包资源图标时使用",
     "bound": {
       "x": 0.884047,
       "y": 0.540448,
@@ -365,10 +365,10 @@
   },
   {
     "id": 29,
-    "name": "item_rope_coil",
-    "category": "item",
-    "desc": "一卷粗糙的合成麻绳",
-    "when": "玩家制作出绳索，或用于建筑升级、捆绑等配方时使用",
+    "name": "resource_rope_coil",
+    "category": "resource",
+    "desc": "盘绕的绳子，呈圆环状并带有捆扎细节",
+    "when": "作为绳子资源、合成材料或建造消耗品时使用",
     "bound": {
       "x": 0.031019,
       "y": 0.709122,
@@ -378,23 +378,23 @@
   },
   {
     "id": 30,
-    "name": "item_raw_fish",
+    "name": "food_fish_raw_blue",
     "category": "food",
-    "desc": "一条新鲜的蓝色海鱼",
-    "when": "钓鱼成功或捕获生鱼，在背包中作为食材显示时使用",
+    "desc": "蓝色生鱼，鱼身完整并带有红色切面细节",
+    "when": "作为捕获后的生鱼、可烹饪食材或背包物品时使用",
     "bound": {
       "x": 0.17356,
-      "y": 0.704819,
+      "y": 0.70568,
       "w": 0.100443,
-      "h": 0.092943
+      "h": 0.092083
     }
   },
   {
     "id": 31,
-    "name": "item_cooked_fish",
+    "name": "food_fish_cooked_orange",
     "category": "food",
-    "desc": "一条烤得金黄焦脆的熟鱼",
-    "when": "鱼肉烹饪完成，作为可食用回复道具显示时使用",
+    "desc": "橙色熟鱼，鱼身有烤制纹路",
+    "when": "作为烤熟后的食物、可食用物品或奖励时使用",
     "bound": {
       "x": 0.316839,
       "y": 0.70568,
@@ -404,10 +404,10 @@
   },
   {
     "id": 32,
-    "name": "prop_small_box",
-    "category": "container",
-    "desc": "一个小型方形木盒子",
-    "when": "作为小型储物盒、零件箱或场景装饰时使用",
+    "name": "item_supply_crate",
+    "category": "item",
+    "desc": "小型补给木箱，带有斜向木板结构",
+    "when": "作为补给箱图标、掉落物或奖励物品时使用",
     "bound": {
       "x": 0.458641,
       "y": 0.703959,
@@ -417,10 +417,10 @@
   },
   {
     "id": 33,
-    "name": "tool_iron_hook",
+    "name": "tool_hook",
     "category": "tool",
-    "desc": "一把带有木柄的生铁钩爪",
-    "when": "玩家使用钩子抓取海面漂浮物，或装备该工具时使用",
+    "desc": "弯钩工具，金属钩头搭配短木柄",
+    "when": "作为钩取资源、远程拾取或工具栏图标时使用",
     "bound": {
       "x": 0.59675,
       "y": 0.694492,
@@ -430,10 +430,10 @@
   },
   {
     "id": 34,
-    "name": "tool_stone_hammer",
+    "name": "tool_hammer",
     "category": "tool",
-    "desc": "一把用木棍和石头绑制的简易石锤",
-    "when": "玩家进行建造、修理或者装备该建造工具时使用",
+    "desc": "建造锤，灰色锤头配木质手柄",
+    "when": "作为修建、扩展木筏或建造模式工具时使用",
     "bound": {
       "x": 0.732644,
       "y": 0.695353,
@@ -443,10 +443,10 @@
   },
   {
     "id": 35,
-    "name": "item_meat_plate",
-    "category": "food",
-    "desc": "一盘烤好的大鸡腿食物",
-    "when": "高等级饱食度回复食物，在背包或快捷栏中显示",
+    "name": "ui_food_icon",
+    "category": "ui",
+    "desc": "圆形食物图标，中间是鸡腿样式的食物符号",
+    "when": "显示饥饿值、食物按钮、食物分类或提示时使用",
     "bound": {
       "x": 0.872969,
       "y": 0.695353,
@@ -456,10 +456,10 @@
   },
   {
     "id": 36,
-    "name": "ui_frame_plain",
+    "name": "ui_slot_empty",
     "category": "ui",
-    "desc": "木纹质感的简单方形UI边框",
-    "when": "作为通用道具格子背景、选项背景时使用",
+    "desc": "空的方形物品格，棕色边框搭配浅色内底",
+    "when": "背包、快捷栏或物品栏中的普通空格子使用",
     "bound": {
       "x": 0.026588,
       "y": 0.849398,
@@ -469,10 +469,10 @@
   },
   {
     "id": 37,
-    "name": "ui_frame_corners",
+    "name": "ui_slot_selected",
     "category": "ui",
-    "desc": "四角带有白色直角修饰的木纹UI框",
-    "when": "用于突出显示选中的道具栏或焦点目标时使用",
+    "desc": "被选中的物品格，四角有白色高亮描边",
+    "when": "当前选中的快捷栏格子或焦点物品格使用",
     "bound": {
       "x": 0.158789,
       "y": 0.843373,
@@ -482,10 +482,10 @@
   },
   {
     "id": 38,
-    "name": "ui_frame_rope",
+    "name": "ui_wood_label_panel",
     "category": "ui",
-    "desc": "四边绑有绳索的木质广告牌UI框",
-    "when": "游戏内告示牌、任务说明或主菜单按钮背景时使用",
+    "desc": "横向木质信息面板，四角带有绳结装饰",
+    "when": "显示标题、物品说明、提示文字或小型弹窗时使用",
     "bound": {
       "x": 0.299852,
       "y": 0.849398,
@@ -495,23 +495,10 @@
   },
   {
     "id": 39,
-    "name": "ui_frame_large",
+    "name": "ui_orange_button",
     "category": "ui",
-    "desc": "无装饰的方形大木板底页",
-    "when": "作为设置面板、合成表、背包界面的底图时使用",
-    "bound": {
-      "x": 0.576809,
-      "y": 0.843373,
-      "w": 0.118168,
-      "h": 0.127367
-    }
-  },
-  {
-    "id": 40,
-    "name": "ui_button_wood",
-    "category": "ui",
-    "desc": "一块扁长形的长条木板按钮",
-    "when": "作为游戏内通用确认、取消等木质按钮底图使用",
+    "desc": "橙色圆角按钮，表面有轻微高光和阴影",
+    "when": "确认、制作、建造、开始等普通按钮状态时使用",
     "bound": {
       "x": 0.445347,
       "y": 0.873494,
@@ -520,11 +507,24 @@
     }
   },
   {
-    "id": 41,
-    "name": "ui_button_dark",
+    "id": 40,
+    "name": "ui_large_slot_panel",
     "category": "ui",
-    "desc": "暗褐色的胶囊形长条按钮底槽",
-    "when": "作为按钮的未选中或禁用状态底图时使用",
+    "desc": "较大的方形面板，棕色外框搭配浅色内容区域",
+    "when": "显示大图标、装备格、物品详情或弹窗主格子时使用",
+    "bound": {
+      "x": 0.576809,
+      "y": 0.843373,
+      "w": 0.118168,
+      "h": 0.127367
+    }
+  },
+  {
+    "id": 41,
+    "name": "ui_progress_bar_empty",
+    "category": "ui",
+    "desc": "空的长条进度槽，深色内部和棕色边框",
+    "when": "显示未填充的进度、耐久、饥饿或制作槽底图时使用",
     "bound": {
       "x": 0.717134,
       "y": 0.888124,
@@ -534,10 +534,10 @@
   },
   {
     "id": 42,
-    "name": "ui_progress_blue",
+    "name": "ui_progress_bar_blue",
     "category": "ui",
-    "desc": "亮蓝色的圆角玻璃质感进度条/长条按钮",
-    "when": "作为饱食度、水分等状态指示条的填充物或蓝色功能按钮使用",
+    "desc": "蓝色填充长条，带有亮面高光",
+    "when": "显示已填充的进度、状态值、冷却或资源条时使用",
     "bound": {
       "x": 0.857459,
       "y": 0.888124,

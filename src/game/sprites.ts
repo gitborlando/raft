@@ -1,46 +1,11 @@
+import spriteDesc from '../assets/spirte-desc.json'
 import type { SpriteFrame, SpriteName } from './types'
 
-export const frames: Record<SpriteName, SpriteFrame> = {
-  chara_front_idle: { x: 0.043575, y: 0.018933, w: 0.083456, h: 0.141997 },
-  chara_back_idle: { x: 0.189808, y: 0.018933, w: 0.080502, h: 0.141997 },
-  chara_side_idle_right: { x: 0.337518, y: 0.019793, w: 0.080502, h: 0.141997 },
-  chara_side_idle_left: { x: 0.467504, y: 0.018072, w: 0.078287, h: 0.142857 },
-  chara_front_walk: { x: 0.607829, y: 0.019793, w: 0.081241, h: 0.143718 },
-  chara_back_walk: { x: 0.745199, y: 0.018933, w: 0.078287, h: 0.141997 },
-  chara_side_walk: { x: 0.881832, y: 0.018933, w: 0.078287, h: 0.141997 },
-  chara_side_run: { x: 0.033973, y: 0.195353, w: 0.078287, h: 0.138554 },
-  chara_punch_front: { x: 0.17873, y: 0.193632, w: 0.095273, h: 0.138554 },
-  chara_punch_side: { x: 0.320532, y: 0.194492, w: 0.077548, h: 0.137694 },
-  tile_wood_floor: { x: 0.452733, y: 0.198795, w: 0.108567, h: 0.135972 },
-  tile_wood_edge: { x: 0.590103, y: 0.198795, w: 0.112999, h: 0.135972 },
-  tile_water_1: { x: 0.728951, y: 0.199656, w: 0.110783, h: 0.134251 },
-  tile_water_2: { x: 0.862629, y: 0.199656, w: 0.110044, h: 0.134251 },
-  tile_water_wave: { x: 0.024372, y: 0.370912, w: 0.110783, h: 0.124785 },
-  item_wood_bundle: { x: 0.177253, y: 0.385542, w: 0.091581, h: 0.089501 },
-  item_water_bottle: { x: 0.311669, y: 0.375215, w: 0.089365, h: 0.104131 },
-  item_palm_leaf: { x: 0.463811, y: 0.376936, w: 0.081241, h: 0.095525 },
-  item_wood_crate: { x: 0.595273, y: 0.366609, w: 0.084195, h: 0.114458 },
-  prop_grill_empty: { x: 0.722304, y: 0.370912, w: 0.119645, h: 0.121343 },
-  prop_grill_raw_fish: { x: 0.862629, y: 0.370912, w: 0.118907, h: 0.121343 },
-  prop_grill_cooked_fish: { x: 0.019202, y: 0.532702, w: 0.121861, h: 0.120482 },
-  prop_chest_closed: { x: 0.17356, y: 0.54389, w: 0.101182, h: 0.120482 },
-  prop_chest_open: { x: 0.316839, y: 0.530981, w: 0.095273, h: 0.135112 },
-  prop_fish_net: { x: 0.450517, y: 0.536145, w: 0.114476, h: 0.124785 },
-  item_single_plank: { x: 0.601182, y: 0.543029, w: 0.085672, h: 0.105852 },
-  item_plastic_waste: { x: 0.731905, y: 0.540448, w: 0.095273, h: 0.104991 },
-  item_small_leaf: { x: 0.884047, y: 0.540448, w: 0.076071, h: 0.107573 },
-  item_rope_coil: { x: 0.031019, y: 0.709122, w: 0.086411, h: 0.08778 },
-  item_raw_fish: { x: 0.17356, y: 0.704819, w: 0.100443, h: 0.092943 },
-  item_cooked_fish: { x: 0.316839, y: 0.70568, w: 0.099705, h: 0.096386 },
-  prop_small_box: { x: 0.458641, y: 0.703959, w: 0.085672, h: 0.106713 },
-  tool_iron_hook: { x: 0.59675, y: 0.694492, w: 0.079025, h: 0.113597 },
-  tool_stone_hammer: { x: 0.732644, y: 0.695353, w: 0.085672, h: 0.112737 },
-  item_meat_plate: { x: 0.872969, y: 0.695353, w: 0.095273, h: 0.112737 },
-  ui_frame_plain: { x: 0.026588, y: 0.849398, w: 0.090842, h: 0.110155 },
-  ui_frame_corners: { x: 0.158789, y: 0.843373, w: 0.107829, h: 0.121343 },
-  ui_frame_rope: { x: 0.299852, y: 0.849398, w: 0.119645, h: 0.110155 },
-  ui_frame_large: { x: 0.576809, y: 0.843373, w: 0.118168, h: 0.127367 },
-  ui_button_wood: { x: 0.445347, y: 0.873494, w: 0.106352, h: 0.072289 },
-  ui_button_dark: { x: 0.717134, y: 0.888124, w: 0.121123, h: 0.037866 },
-  ui_progress_blue: { x: 0.857459, y: 0.888124, w: 0.124815, h: 0.037866 },
+type SpriteDescItem = {
+  name: SpriteName
+  bound: SpriteFrame
 }
+
+export const frames = Object.fromEntries(
+  (spriteDesc as SpriteDescItem[]).map(({ name, bound }) => [name, bound]),
+) as Record<SpriteName, SpriteFrame>

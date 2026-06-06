@@ -1,7 +1,6 @@
-import { flushSync } from 'react-dom'
 import { createRoot } from 'react-dom/client'
 import { App } from './App'
-import { uiStore } from './uiStore'
+import { rootStore } from './stores/RootStore'
 
 const app = document.querySelector<HTMLDivElement>('#app')
 
@@ -11,8 +10,13 @@ if (!app) {
 
 const root = createRoot(app)
 
-flushSync(() => {
-  root.render(<App store={uiStore} />)
+document.addEventListener('fullscreenchange', () => {
+  rootStore.ui.syncFullscreenState()
 })
 
-await import('./game/runtime')
+if (!rootStore.ui.skipFullscreenPrompt) {
+  window.addEventListener('pointerdown', () => void rootStore.ui.requestFullscreen(), { once: true })
+  window.addEventListener('keydown', () => void rootStore.ui.requestFullscreen(), { once: true })
+}
+
+root.render(<App store={rootStore} />)

@@ -21,6 +21,7 @@
     "@linaria/react": "^7.0.1",
     "mobx": "^6.15.4",
     "mobx-react-lite": "^4.1.1",
+    "phaser": "^4.0.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   }
